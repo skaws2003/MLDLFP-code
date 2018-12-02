@@ -1,4 +1,4 @@
-import sentiment140_dataset as sd
+import dataset as sd
 import torch
 
 datasets = {x: sd.Sentiment_dataset(filename=sd.DATASET_PATH[x]) for x in ['test','train']}

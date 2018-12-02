@@ -1,3 +1,4 @@
 dataset/train.csv
 dataset/test.csv
 .vscode/*
+*.pyc

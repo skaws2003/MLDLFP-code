@@ -2,20 +2,20 @@ import torch
 import torchvision
 import pandas as pd
 
-# Some args
+
 DATASET_PATH = {
     'train': '../dataset/train.csv',
     'test': '../dataset/test.csv'
 }
 
 class Sentiment_dataset(torch.utils.data.Dataset):
-    def __init__(self,filename):
+    def __init__(self,dataset_path):
         """
-        Dataloader for Sentiment-140 dataset
+        Dataset for Sentiment-140 dataset
         Fields
-        - filename: file pathe to dataset csv file
+        - dataset_path: file path to dataset csv file
         """
-        all_data = pd.read_csv(filename,names=['polarity','id','date','query','user','text'])
+        all_data = pd.read_csv(dataset_path,names=['polarity','id','date','query','user','text'])
         polarity = all_data['polarity']
         text = all_data['text']
         self.data = pd.DataFrame(data={'polarity':polarity,'text':text})
@@ -26,3 +26,5 @@ class Sentiment_dataset(torch.utils.data.Dataset):
     def __getitem__(self,index):
         rtn = self.data.iloc[index]
         return (rtn['text'],rtn['polarity'])
+
+
