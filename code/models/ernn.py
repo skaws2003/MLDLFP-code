@@ -19,7 +19,7 @@ class EfficientRNN(nn.Module):
             self.rnns.append(nn.LSTMCell(self.input_size, self.hidden_size).to(device))
 
         self.selective_layer = nn.Linear(hidden_size + input_size, num_split)  # 2 for bidirection
-        self.l1 = nn.Linear(hidden_size * 4 * 32, hidden_size * 4)
+        self.l1 = nn.Linear(self.hidden_size, self.num_classes)
 
     def forward(self, x):
         # Set initial states
@@ -29,6 +29,7 @@ class EfficientRNN(nn.Module):
 
         h, c = self.rnns[cur_cell](x[:, 0, :].view(x.size(0), x.size(2)), (h0, c0))
         outputs = h.view(x.size(0), 1, h.size(1))
+        out = h
 
         for i in range(1, x.size(1)):
             output = self.selective_layer(torch.cat((h, x[:,i,:].view(x.size(0),x.size(2))), dim=1))
@@ -38,9 +39,11 @@ class EfficientRNN(nn.Module):
 
             h, c = self.rnns[cur_cell](x[:,i,:].view(x.size(0), x.size(2)), (h, c))
             outputs = torch.cat((outputs, h.view(x.size(0), 1, h.size(1))), dim=1)
+            out = h
 
         #outputs = outputs.transpose(0, 1)
-        return outputs #(batch, seq_len, hidden)
+        out = self.l1(out)
+        return out
 
 
 def test():
