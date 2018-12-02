@@ -1,7 +1,8 @@
-import dataset as sd
+import our_dataset as od
 import torch
+import torchvision
 
-datasets = {x: sd.Sentiment_dataset(filename=sd.DATASET_PATH[x]) for x in ['test','train']}
+datasets = {x: od.Sentiment_dataset(dataset_path=od.DATASET_PATH[x]) for x in ['train','test']}
 
 dataloaders = {
     'test': torch.utils.data.DataLoader(
@@ -15,7 +16,6 @@ dataloaders = {
         shuffle=True
     )
 }
-
 
 for i,(text,semantic) in enumerate(dataloaders['train']):
     if i > 2:
