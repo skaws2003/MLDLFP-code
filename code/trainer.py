@@ -120,11 +120,11 @@ class Trainer():
             torch.save(state, self.checkpoint_loc)
             best_acc = acc
 
-        #actual training
-        def trainepoch(epoch_num):
-            for epoch in range(self.start_epoch, self.start_epoch + epoch_num):
-                self.train(epoch)
-                self.test(epoch)
+    #actual training
+    def trainepoch(self, epoch_num):
+        for epoch in range(self.start_epoch, self.start_epoch + epoch_num):
+            self.train(epoch)
+            self.test(epoch)
 
-            print('finished training')
-            self.start_epoch += epoch_num
+        print('finished training')
+        self.start_epoch += epoch_num
