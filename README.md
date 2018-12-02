@@ -7,4 +7,7 @@ Final project code and write up repo
 * Jinwoo Nam, 20155064, skaws2003@gist.ac.kr
 * Junoh Lee, 20155134, juno@gist.ac.kr
 * Jabin Koo, 20155009, pseineshi@gist.ac.kr
-# Any sections you want to put
+
+# Setup Guide
+## Dataset
+The dataset can be downloaded from [here](https://docs.google.com/file/d/0B04GJPshIjmPRnZManQwWEdTZjg/edit)
