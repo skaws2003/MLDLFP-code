@@ -11,3 +11,5 @@ Final project code and write up repo
 # Setup Guide
 ## Dataset
 The dataset can be downloaded from [here](https://docs.google.com/file/d/0B04GJPshIjmPRnZManQwWEdTZjg/edit)
+
+Put the downloaded files in datasets/ directory and name them with 'train.csv','test.csv'.
