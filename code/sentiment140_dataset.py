@@ -9,9 +9,12 @@ DATASET_PATH = {
 }
 
 class Sentiment_dataset(torch.utils.data.Dataset):
-    def __init__(self,filename,print_line=None):
-        if print_line:
-            print(print_line)
+    def __init__(self,filename):
+        """
+        Dataloader for Sentiment-140 dataset
+        Fields
+        - filename: file pathe to dataset csv file
+        """
         all_data = pd.read_csv(filename,names=['polarity','id','date','query','user','text'])
         polarity = all_data['polarity']
         text = all_data['text']
