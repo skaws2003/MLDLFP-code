@@ -2,12 +2,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from util.graph_definition import *
+from .graph_definition import *
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class EfficientRNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes, num_split):
-        super(BidirectRNN, self).__init__()
+        super(EfficientRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
