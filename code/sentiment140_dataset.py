@@ -4,8 +4,8 @@ import pandas as pd
 
 # Some args
 DATASET_PATH = {
-    'train': 'dataset/train.csv',
-    'test': 'dataset/test.csv'
+    'train': '../dataset/train.csv',
+    'test': '../dataset/test.csv'
 }
 
 class Sentiment_dataset(torch.utils.data.Dataset):
