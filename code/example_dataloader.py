@@ -22,11 +22,3 @@ for i,(text,semantic) in enumerate(dataloaders['train']):
         break
     print(text)
     print(semantic)
-
-    """
-    'train': torch.utils.data.DataLoader(
-        dataset=datasets['train'],
-        batch_size=10,
-        shuffle=True
-        ),
-    """

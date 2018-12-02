@@ -9,7 +9,7 @@ DATASET_PATH = {
 class Sentiment_dataset(torch.utils.data.Dataset):
     def __init__(self,dataset_path):
         """
-        Dataloader for Sentiment-140 dataset
+        Dataset for Sentiment-140 dataset
         Fields
         - dataset_path: file path to dataset csv file
         """
