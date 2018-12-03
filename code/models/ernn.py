@@ -19,7 +19,7 @@ class EfficientRNN(nn.Module):
             self.rnns.append(nn.LSTMCell(self.input_size, self.hidden_size).to(device))
 
         self.selective_layer = nn.Linear(hidden_size + input_size, num_split)  # 2 for bidirection
-        self.l1 = nn.Linear(self.hidden_size, self.num_classes)
+        self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
     def forward(self, x):
         # Set initial states
@@ -42,7 +42,7 @@ class EfficientRNN(nn.Module):
             out = h
 
         #outputs = outputs.transpose(0, 1)
-        out = self.l1(out)
+        out = self.fc(out)
         return out
 
 
