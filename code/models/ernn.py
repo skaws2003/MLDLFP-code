@@ -8,7 +8,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class EfficientRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes, num_split):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3):
         super(EfficientRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -16,18 +16,22 @@ class EfficientRNN(nn.Module):
         self.num_classes = num_classes
         self.rnns = []
         for i in range(num_split):
-            self.rnns.append(nn.LSTMCell(self.input_size, self.hidden_size).to(device))
+            self.rnns.append(nn.GRUCell(self.input_size, self.hidden_size).to(device))
 
         self.selective_layer = nn.Linear(hidden_size + input_size, num_split)  # 2 for bidirection
-        self.fc = nn.Linear(self.hidden_size, self.num_classes)
+        #self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
-    def forward(self, x):
+    def forward(self, x, hidden=None):
         # Set initial states
-        h0 = torch.zeros(x.size(0), self.hidden_size).to(device)  # 2 for bidirection
-        c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
+        if hidden is None:
+            h0 = torch.zeros(x.size(0), 1, self.hidden_size).to(device)  # 2 for bidirection
+            #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
+        else:
+            h0 = hidden
+
         cur_cell = 0
 
-        h, c = self.rnns[cur_cell](x[:, 0, :].view(x.size(0), x.size(2)), (h0, c0))
+        h = self.rnns[cur_cell](x[:, 0, :])
         outputs = h.view(x.size(0), 1, h.size(1))
         out = h
 
@@ -37,13 +41,13 @@ class EfficientRNN(nn.Module):
             output = F.softmax(output, dim=1)
             _, cur_cell = output.max(1)
 
-            h, c = self.rnns[cur_cell](x[:,i,:].view(x.size(0), x.size(2)), (h, c))
+            h = self.rnns[cur_cell](x[:,i,:])
             outputs = torch.cat((outputs, h.view(x.size(0), 1, h.size(1))), dim=1)
             out = h
 
         #outputs = outputs.transpose(0, 1)
-        out = self.fc(out)
-        return out
+        #out = self.fc(out)
+        return outputs, h
 
 
 def test():
@@ -56,7 +60,7 @@ def test():
     net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split).to(device)
     x = torch.randn(1, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
-    print(y.size())
+    print(y[0].size())
 
 if __name__=="__main__":
     test()
