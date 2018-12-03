@@ -13,10 +13,9 @@ import torchvision.transforms as transforms
 import os
 import argparse
 
-from models import *
-from utils import progress_bar
-from utils import ImageFolderWithPaths
-import our_dataset as ds
+
+from code.models import *
+import code.out_dataset as ds
 import csv
 
 
@@ -42,7 +41,7 @@ class Trainer():
 
         # Model
         print('==> Building model..')
-        self.net = BiRNN()
+        self.net = RNN()
         self.net = self.net.to(self.device)
 
 
@@ -82,7 +81,7 @@ class Trainer():
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            progress_bar(batch_idx, len(self.trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+            print(batch_idx, len(self.trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                 % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
         print(correct/total)
 
@@ -103,7 +102,7 @@ class Trainer():
                 total += targets.size(0)
                 correct += predicted.eq(targets).sum().item()
 
-                progress_bar(batch_idx, len(self.valloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+                print(batch_idx, len(self.valloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                     % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
         # Save checkpoint.
