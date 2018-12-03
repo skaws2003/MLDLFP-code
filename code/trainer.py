@@ -33,7 +33,7 @@ class Trainer():
         # Data
         print('==> Preparing data..')
 
-        self.datasets = {x: ds.Sentiment_dataset(filename=ds.DATASET_PATH[x]) for x in ['test', 'train']}
+        self.datasets = {x: ds.Sentiment_dataset(dataset_path=ds.DATASET_PATH[x]) for x in ['test', 'train']}
         self.trainloader = torch.utils.data.DataLoader(self.datasets['train'], batch_size=batch_size, shuffle=True, num_workers=2)
         self.valloader = torch.utils.data.DataLoader(self.datasets['test'], batch_size=batch_size, shuffle=False, num_workers=2)
 
