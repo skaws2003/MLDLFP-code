@@ -12,19 +12,21 @@ class RNN(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
-        self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False)
+        self.gru = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False)
         self.fc = nn.Linear(self.hidden_size, num_classes)
 
-    def forward(self, x):
+    def forward(self, x, hidden=None):
         # Set initial states
-        h0 = torch.zeros(x.size(0), self.num_layers, self.hidden_size).to(device)
-        c0 = torch.zeros(x.size(0), self.num_layers, self.hidden_size).to(device)
+        if hidden is None:
+            h0 = torch.zeros(x.size(0), 1, self.hidden_size).to(device)  # 2 for bidirection
+            #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
+        else:
+            h0 = hidden
 
         # Forward propagate LSTM
-        out, _ = self.lstm(x, (h0, c0))  # out: tensor of shape (batch_size, seq_length, hidden_size*2) #inputshape = (batch_size, seq_len, input_size)
+        out, h = self.gru(x, h0)  # out: tensor of shape (batch_size, seq_length, hidden_size*2) #inputshape = (batch_size, seq_len, input_size)
 
-        out = self.fc(out)[:,-1,:]
-        return out
+        return out, h
 
 def test():
     input_size = 10
@@ -35,7 +37,7 @@ def test():
     net = RNN(input_size, hidden_size, num_layers, num_classes).to(device)
     x = torch.randn(1, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
-    print(y.size())
+    print(y[0].size())
 
 if __name__== "__main__":
     test()
