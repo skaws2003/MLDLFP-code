@@ -13,28 +13,31 @@ import torchvision.transforms as transforms
 import os
 import argparse
 
+
 from code.models import *
 import code.out_dataset as ds
+import csv
+
 
 class Trainer():
 
-    def __init__(self, learning_rate, checkpoint_loc, batch_size):
+    def __init__(self, learning_rate, checkpoint_loc, csv_loc, batch_size):
         self.learning_rate = learning_rate
         self.checkpoint_loc = checkpoint_loc
+        self.csv_loc = csv_loc
         self.batch_size = batch_size
 
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.best_acc = 0  # best test accuracy
         self.start_epoch = 0  # start from epoch 0 or last checkpoint epoch
-
+        self.this_acc = 0
+        self.this_loss = 0
         # Data
         print('==> Preparing data..')
 
-        self.datasets = {x: ds.Sentiment_dataset(filename=ds.DATASET_PATH[x]) for x in ['test', 'train']}
+        self.datasets = {x: ds.Sentiment_dataset(dataset_path=ds.DATASET_PATH[x]) for x in ['test', 'train']}
         self.trainloader = torch.utils.data.DataLoader(self.datasets['train'], batch_size=batch_size, shuffle=True, num_workers=2)
         self.valloader = torch.utils.data.DataLoader(self.datasets['test'], batch_size=batch_size, shuffle=False, num_workers=2)
-
-        self.classes = ('cup', 'coffee', 'bed', 'tree', 'bird', 'chair', 'tea', 'bread', 'bicycle', 'sail')
 
         # Model
         print('==> Building model..')
@@ -104,6 +107,8 @@ class Trainer():
 
         # Save checkpoint.
         acc = 100.*correct/total
+        self.this_loss = test_loss / enumerate(self.valloader)
+        self.this_acc = acc
         print(acc)
         if acc > best_acc:
             print('Saving..  %f' % acc)
@@ -119,9 +124,14 @@ class Trainer():
 
     #actual training
     def trainepoch(self, epoch_num):
-        for epoch in range(self.start_epoch, self.start_epoch + epoch_num):
-            self.train(epoch)
-            self.test(epoch)
+        with open(self.csv_loc, 'wb') as csvfile:
+            filewriter = csv.writer(csvfile, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            filewriter.writerow(['epoch', 'loss', 'accuracy'])
+            for epoch in range(self.start_epoch, self.start_epoch + epoch_num):
+                self.train(epoch)
+                self.test(epoch)
+                filewriter.writerow([epoch, self.this_loss, self.this_acc])
 
         print('finished training')
         self.start_epoch += epoch_num
