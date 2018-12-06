@@ -4,9 +4,11 @@ import utils
 import re               # Regular Expressions
 from random import shuffle
 
+# Some Constants
 POSITIVE=1
 NEGATIVE=0
 
+# Path to Dataset
 DATASET_PATH = {
     'positive_train': '../dataset/positive_train.txt',
     'negative_train': '../dataset/negative_train.txt',
