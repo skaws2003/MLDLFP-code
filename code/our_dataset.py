@@ -30,7 +30,7 @@ def sentence_to_word(sentence):
     """
     word_list = []
     for word in sentence.split(" "):
-        if len(word)> s:
+        if len(word)> 0:
             word_list.append(word)
     return word_list
 
@@ -41,8 +41,8 @@ def normalizeString(sentence):
     - sentence: python string
     """
     #s = unicodeToAscii(sentence)
-    s = re.sub(r'([\.!?"])+', r" \1", sentence)
-    s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
+    s = re.sub(r'([\.|!|?|"])+', r" \1", sentence)
+    s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
     return s
 
 class Polarity_dataset(torch.utils.data.Dataset):
