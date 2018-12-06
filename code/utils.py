@@ -191,7 +191,8 @@ class Lang:  # ont-hot vector 인코딩 다른 embedding 필요 language
             self.word2count[word]
 
 def normalizeString(s):
-    s = re.sub(r"([.!?])", r" \1", s)
+    s = re.sub(r'([.!?"])', r" \1", s)
+    s = re.sub(r"[^a-zA-Z.!?]+", r" \1", s)
     return s
 
 def readLangs(lang):

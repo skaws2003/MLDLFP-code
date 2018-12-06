@@ -1,30 +1,75 @@
 import torch
 import torchvision
-import pandas as pd
+import utils
+import re               # Regular Expressions
+from random import shuffle
 
+POSITIVE=1
+NEGATIVE=0
 
 DATASET_PATH = {
-    'train': '../dataset/train.csv',
-    'test': '../dataset/test.csv'
+    'positive_train': '../dataset/positive_train.txt',
+    'negative_train': '../dataset/negative_train.txt',
+    'positive_test': '../dataset/positive_test.txt',
+    'negative_test': '../dataset/negative_test.txt'
 }
 
-class Sentiment_dataset(torch.utils.data.Dataset):
-    def __init__(self,dataset_path):
+def sentence_to_word(sentence):
+    """
+    tokenize string into words.
+    Fields
+    - sentence: python string
+    """
+    word_list = []
+    for word in sentence.split(" "):
+        if len(word)> 0:
+            word_list.append(word)
+    return word_list
+
+def normalizeString(sentence):
+    """
+    Delete some unuseful words from the given sentence
+    Fields
+    - sentence: python string
+    """
+    s = re.sub(r'([.!?"])', r" \1", sentence)
+    s = re.sub(r"[^a-zA-Z.!?]+", r" \1", s)
+    return s
+
+class Polarity_dataset(torch.utils.data.Dataset):
+    def __init__(self,pos_path,neg_path):
         """
-        Dataset for Sentiment-140 dataset
+        Dataset class for Polarity dataset
         Fields
-        - dataset_path: file path to dataset csv file
+        - pos_data: file path to positive dataset txt file
+        - neg_data: file path to negative dataset txt file
         """
-        all_data = pd.read_csv(dataset_path,names=['polarity','id','date','query','user','text'])
-        polarity = all_data['polarity']
-        text = all_data['text']
-        self.data = pd.DataFrame(data={'polarity':polarity,'text':text})
+        pos_file = open(pos_path)
+        neg_file = open(neg_path)
+
+        pos = pos_file.readlines()
+        neg = neg_file.readlines()
+
+        self.dataset = []
+
+        for sent in pos:
+            sent_normalized = normalizeString(sent)
+            sent_tokenized = sentence_to_word(sent_normalized)
+            self.dataset.append((sent_tokenized,POSITIVE))
+
+        for sent in neg:
+            sent_normalized = utils.normalizeString(sent)
+            sent_tokenized = sentence_to_word(sent_normalized)
+            self.dataset.append((sent_tokenized,NEGATIVE))
+        
+        shuffle(self.dataset)
+        
+        pos_file.close()
+        neg_file.close()
 
     def __len__(self):
-        return len(self.data.index)
+        return len(self.dataset)
 
     def __getitem__(self,index):
-        rtn = self.data.iloc[index]
-        return (rtn['text'],rtn['polarity'])
-
+        return self.dataset[index]
 
