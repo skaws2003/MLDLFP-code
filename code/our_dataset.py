@@ -30,7 +30,7 @@ def sentence_to_word(sentence):
     """
     word_list = []
     for word in sentence.split(" "):
-        if len(word)> 0:
+        if len(word)> s:
             word_list.append(word)
     return word_list
 
