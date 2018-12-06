@@ -281,15 +281,18 @@ def tensorFromSentence(lang, sentence):
 
 
 class WEmbedding():
-    def __init__(self, filename):
+    def __init__(self, filename, length = 200):
         self.name = filename
-        self.word2vec = {"SOS":[0]*200, "EOS":[0]*200, "UNKNOWN":[0]*200}
+        self.word2vec = {"SOS":[0]*length, "EOS":[0]*length, "UNKNOWN":[0]*length}
         self.n_words = 0
         self.dim = 0
         self.load(filename)
 
     def getvec(self, word):
         return self.word2vec[word]
+
+    def setvec(self, word, vec): #word = 단어 'word' vec = 벡터 [1, 2, 3, 4, ..., 200]
+        self.word2vec[word] = vec
 
     def load(self, file):
         with open(file, 'r', encoding='utf8') as f:
