@@ -1,8 +1,8 @@
 import torch
 import torchvision
-import utils
 import re               # Regular Expressions
 from random import shuffle
+import unicodedata
 
 # Some Constants
 POSITIVE=1
@@ -15,6 +15,12 @@ DATASET_PATH = {
     'positive_test': '../dataset/positive_test.txt',
     'negative_test': '../dataset/negative_test.txt'
 }
+
+def unicodeToAscii(s):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', s)
+        if unicodedata.category(c) != 'Mn'
+    )
 
 def sentence_to_word(sentence):
     """
@@ -34,8 +40,9 @@ def normalizeString(sentence):
     Fields
     - sentence: python string
     """
-    s = re.sub(r'([.!?"])', r" \1", sentence)
-    s = re.sub(r"[^a-zA-Z.!?]+", r" \1", s)
+    #s = unicodeToAscii(sentence)
+    s = re.sub(r'([\.!?"])+', r" \1", sentence)
+    s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
     return s
 
 class Polarity_dataset(torch.utils.data.Dataset):
@@ -60,7 +67,7 @@ class Polarity_dataset(torch.utils.data.Dataset):
             self.dataset.append((sent_tokenized,POSITIVE))
 
         for sent in neg:
-            sent_normalized = utils.normalizeString(sent)
+            sent_normalized = normalizeString(sent)
             sent_tokenized = sentence_to_word(sent_normalized)
             self.dataset.append((sent_tokenized,NEGATIVE))
         
