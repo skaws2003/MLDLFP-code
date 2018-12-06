@@ -8,15 +8,16 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class EfficientRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3, device = 'cpu'):
         super(EfficientRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
         self.num_classes = num_classes
         self.rnns = []
+        self.device = device
         for i in range(num_split):
-            self.rnns.append(nn.GRUCell(self.input_size, self.hidden_size).to(device))
+            self.rnns.append(nn.GRUCell(self.input_size, self.hidden_size).to(self.device))
 
         self.selective_layer = nn.Linear(hidden_size + input_size, num_split)  # 2 for bidirection
         #self.fc = nn.Linear(self.hidden_size, self.num_classes)
@@ -24,7 +25,7 @@ class EfficientRNN(nn.Module):
     def forward(self, x, hidden=None):
         # Set initial states
         if hidden is None:
-            h0 = torch.zeros(x.size(0), 1, self.hidden_size).to(device)  # 2 for bidirection
+            h0 = torch.zeros(1, 1, self.hidden_size).to(self.device)  # 2 for bidirection
             #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
         else:
             h0 = hidden
@@ -57,7 +58,7 @@ def test():
     num_layers = 2
     num_classes = 5
     num_split = 3
-    net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split).to(device)
+    net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device)
     x = torch.randn(1, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
     print(y[0].size())

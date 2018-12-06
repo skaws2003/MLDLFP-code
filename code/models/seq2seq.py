@@ -1,27 +1,34 @@
-from code.models.ernn import *
+from ernn import *
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+#from utils.graph_definition import *
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class EncoderRNN(nn.Module):
-    def __init__(self, hidden_size, embedding, n_layers=1, num_split=3, dropout=0):
+    def __init__(self, input_size, hidden_size, embedding, n_layers=1, num_split=3, dropout=0):
         super(EncoderRNN, self).__init__()
         self.n_layers = n_layers
         self.hidden_size = hidden_size
         self.embedding = embedding
-        self,num_split = num_split
+        self.num_split = num_split
 
         # Initialize GRU; the input_size and hidden_size params are both set to 'hidden_size'
         #   because our input size is a word embedding with number of features == hidden_size
-        self.model = EfficientRNN(hidden_size, hidden_size, n_layers, num_split=num_split)
+        self.model = EfficientRNN(input_size, hidden_size, n_layers, num_split=num_split, device='cpu')
 
     def forward(self, input_seq, input_lengths, hidden=None):
         # Convert word indexes to embeddings
         embedded = self.embedding(input_seq)
         # Pack padded batch of sequences for RNN module
-        packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_lengths)
+        #packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_lengths, batch_first=True)
         # Forward pass through GRU
-        outputs, hidden = self.model(packed, hidden)
+        outputs, hidden = self.model(embedded, hidden)
         # Unpack padding
-        outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
+        #outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
         # Sum bidirectional GRU outputs
         #outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
         # Return output and final hidden state
@@ -108,3 +115,55 @@ class LuongAttnDecoderRNN(nn.Module):
         output = F.softmax(output, dim=1)
         # Return output and final hidden state
         return output, hidden
+
+class linear_decoder(nn.Module):
+    def __init__(self, attn_model, embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1):
+        super(linear_decoder, self).__init__()
+
+        # Keep for reference
+        self.attn_model = attn_model
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.n_layers = n_layers
+        self.dropout = dropout
+
+        # Define layers
+        self.embedding = embedding
+        self.embedding_dropout = nn.Dropout(dropout)
+        self.concat = nn.Linear(hidden_size*2, hidden_size)
+        self.out = nn.Linear(hidden_size, output_size)
+
+        self.attn = Attn(attn_model, hidden_size)
+
+    def forward(self, last_hidden, encoder_outputs):
+        # Note: we run this one step (word) at a time
+        # Get embedding of current input word
+        # Calculate attention weights from the current GRU output
+        attn_weights = self.attn(last_hidden, encoder_outputs)
+        # Multiply attention weights to encoder outputs to get new "weighted sum" context vector
+        context = attn_weights.bmm(encoder_outputs.transpose(0, 1))
+        # Concatenate weighted context vector and GRU output using Luong eq. 5
+        context = torch.sum(context.squeeze(1), dim=0).view(1, -1)
+        concat_input = torch.cat((hidden, context), 1)
+        concat_output = torch.tanh(self.concat(concat_input))
+        # Predict next word using Luong eq. 6
+        output = self.out(concat_output)
+        output = F.softmax(output, dim=1)
+        # Return output and final hidden state
+        return output, hidden
+
+
+if __name__ == "__main__":
+    embedding = nn.Embedding(10, 3)
+    hidden_size = 10
+    output_size = 2
+    input_size = 3
+
+    encoder = EncoderRNN(input_size, hidden_size, embedding, n_layers=1, num_split=3, dropout=0)
+    #attn_model = Attn('general', hidden_size)
+    #decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1)
+    decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1)
+
+    outputs, hidden = encoder(torch.LongTensor([[1,2,3,4]]), torch.LongTensor([len(seq) for seq in [[3,3,3,3]]]))
+    output, hidden = decoder(hidden, outputs)
+    print(output)
