@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import torch
 import torchvision
 import re               # Regular Expressions
@@ -53,8 +55,8 @@ class Polarity_dataset(torch.utils.data.Dataset):
         - pos_data: file path to positive dataset txt file
         - neg_data: file path to negative dataset txt file
         """
-        pos_file = open(pos_path)
-        neg_file = open(neg_path)
+        pos_file = open(pos_path, encoding='utf8')
+        neg_file = open(neg_path, encoding='utf8')
 
         pos = pos_file.readlines()
         neg = neg_file.readlines()

@@ -1,2 +1,2 @@
-from code.models.birnn import *
-from code.models.ernn  import *
+from . import rnn
+from . import ernn

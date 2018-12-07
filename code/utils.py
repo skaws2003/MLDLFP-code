@@ -3,6 +3,7 @@
     - msr_init: net parameter initialization.
     - progress_bar: progress bar mimic xlua.progress.
 '''
+from __future__ import unicode_literals, print_function, division
 import os
 import sys
 import time
@@ -141,7 +142,6 @@ class ImageFolderWithPaths(datasets.ImageFolder):
         return tuple_with_path
 
 
-from __future__ import unicode_literals, print_function, division
 from io import open
 import unicodedata
 import string
@@ -149,12 +149,6 @@ import re
 import random
 
 import torch
-from konlpy.tag import Okt
-from konlpy.utils import pprint
-from konlpy import jvm
-
-jvm.init_jvm()
-tagger = Okt()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -178,7 +172,7 @@ class Lang:  # ont-hot vector 인코딩 다른 embedding 필요 language
         self.n_words = 3  # Count SOS and EOS
 
     def addSentence(self, sentence):  # tokenizer 한국어
-        for word in tagger.morphs(sentence):
+        for word in sentence:
             self.addWord(word)
 
     def addWord(self, word):
@@ -264,7 +258,7 @@ def preparetestset(name):
 #helper
 def indexesFromSentence(lang, sentence):
     list = []
-    for word in tagger.morphs(sentence):
+    for word in sentence:
         try:
             if random.random() < UNKNOWN_P:
                 list.append(lang.word2vec['UNKNOWN'])
@@ -315,7 +309,7 @@ class WEmbedding():
         a = 0
         for sen in sens:
             try:
-                tags = tagger.morphs(sen)
+                tags = sen
                 first = [sum(x) for x in zip(self.word2vec[tags[0]], first)]
                 last = [sum(x) for x in zip(self.word2vec[tags[-3]], last)]
                 ran = [sum(x) for x in zip(self.word2vec[random.choice(tags)], ran)]

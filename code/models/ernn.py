@@ -48,7 +48,7 @@ class EfficientRNN(nn.Module):
 
         #outputs = outputs.transpose(0, 1)
         #out = self.fc(out)
-        return outputs, h
+        return outputs.view(1, -1, self.hidden_size), h.view(1, 1, -1)
 
 
 def test():
