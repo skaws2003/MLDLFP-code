@@ -1,8 +1,11 @@
-import code.our_dataset as od
+import our_dataset as od
 import torch
 import torchvision
 
-datasets = {x: od.Sentiment_dataset(dataset_path=od.DATASET_PATH[x]) for x in ['train','test']}
+datasets = {
+    'test': od.Polarity_dataset(pos_path=od.DATASET_PATH['positive_test'],neg_path=od.DATASET_PATH['negative_test']),
+    'train': od.Polarity_dataset(pos_path=od.DATASET_PATH['positive_train'],neg_path=od.DATASET_PATH['negative_train'])
+}
 
 dataloaders = {
     'test': torch.utils.data.DataLoader(
@@ -12,7 +15,7 @@ dataloaders = {
     ),
     'train': torch.utils.data.DataLoader(
         dataset=datasets['train'],
-        batch_size=10,
+        batch_size=1,
         shuffle=True
     )
 }

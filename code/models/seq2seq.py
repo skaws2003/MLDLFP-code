@@ -167,3 +167,4 @@ if __name__ == "__main__":
     outputs, hidden = encoder(torch.LongTensor([[1,2,3,4]]), torch.LongTensor([len(seq) for seq in [[3,3,3,3]]]))
     output, hidden = decoder(hidden, outputs)
     print(output)
+
