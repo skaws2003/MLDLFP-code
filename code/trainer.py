@@ -14,8 +14,8 @@ import os
 import argparse
 
 
-from code.models import *
-import code.out_dataset as ds
+from models import *
+import out_dataset as ds
 import csv
 
 
