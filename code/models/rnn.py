@@ -35,7 +35,7 @@ def test():
     seq_length = 5
     num_layers = 1
     num_classes = 5
-    net = RNN(input_size, hidden_size, num_layers, num_classes, device).to(device)
+    net = RNN(input_size, hidden_size, num_layers, device).to(device)
     x = torch.randn(1, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
     print(y[0].size())
