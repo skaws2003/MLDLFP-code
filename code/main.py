@@ -32,13 +32,12 @@ batch_size = 1 # should be 1
 # Model
 print('==> Building model..')
 
-input_size = 10  #same as embedding size
-hidden_size = 20
+input_size = 128  #same as embedding size
 seq_length = 5
 num_layers = 2
 num_classes = 5
 num_split = 3
-hidden_size = 10
+hidden_size = 512
 output_size = 2
 input_size = 5
 
