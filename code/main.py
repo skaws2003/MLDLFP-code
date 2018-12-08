@@ -76,7 +76,7 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-criterion = nn.CrossEntropyLoss()
+criterion = nn.MSELoss()
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
@@ -99,7 +99,7 @@ def train(epoch):
         output, hidden = decoder(hidden, outputs)
 
 
-        loss = criterion(output, targets.type(torch.cuda.LongTensor))
+        loss = criterion(output[0], targets)
         loss.backward()
 
         encoder_optimizer.step()
@@ -127,11 +127,11 @@ def test(epoch):
         for batch_idx, (text, semantic) in enumerate(dataloaders['test']):
             inputs, targets = text, semantic.to(device)
 
-            inputs = torch.tensor([lang.word2index(word) for word in text[0]]).to(device)
+            inputs = torch.tensor([[lang.word2index[word] for word in text[0]]]).to(device)
             outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(output, targets.type(torch.cuda.LongTensor))
+            loss = criterion(output[0], targets)
 
             train_loss += loss.item()
             _, predicted = output[0].max(1)
