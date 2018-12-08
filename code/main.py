@@ -70,7 +70,8 @@ if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
     checkpoint = torch.load('checkpoint/path/here/check.t7')
-    net.load_state_dict(checkpoint['net'])
+    encoder.load_state_dict(checkpoint['encoder'])
+    decoder.load_state_dict(checkpoint['decoder'])
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
@@ -146,7 +147,8 @@ def test(epoch):
     if acc > best_acc:
         print('Saving..  %f' % acc)
         state = {
-            'net': net.state_dict(),
+            'encoder': encoder.state_dict(),
+            'decoder': decoder.state_dict(),
             'acc': acc,
             'epoch': epoch,
         }
