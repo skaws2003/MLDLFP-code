@@ -135,8 +135,8 @@ def test(epoch):
             _, t_index = targets.max(1)
             correct += predicted.eq(t_index).sum().item()
 
-            if batch_idx % (len(dataloaders['train']) // 5) == 0:  # print every 10%
-                print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+            if batch_idx % (len(dataloaders['test']) // 5) == 0:  # print every 10%
+                print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
     # Save checkpoint.
