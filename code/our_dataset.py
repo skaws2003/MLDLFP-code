@@ -18,9 +18,12 @@ DATASET_PATH = {
     'negative_test': '../dataset/negative_test.txt'
 }
 
-def unicodeToAscii(s):
+def unicodeToAscii(sentence):
+    """
+    A function for encoding change
+    """
     return ''.join(
-        c for c in unicodedata.normalize('NFD', s)
+        c for c in unicodedata.normalize('NFD', sentence)
         if unicodedata.category(c) != 'Mn'
     )
 
@@ -94,4 +97,5 @@ class Polarity_dataloader():
     def __init__(self,dataset):
         self.dataset = dataset
     def __getitem__(self,index):
-        return self.dataset[index]
+        return [self.dataset[index]]
+
