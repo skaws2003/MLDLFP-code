@@ -89,11 +89,11 @@ def train(epoch):
     correct = 0
     total = 0
     for batch_idx, (text, semantic) in enumerate(dataloaders['train']):
-        inputs, targets = text.to(device), semantic.to(device)
+        inputs, targets = text, semantic.to(device)
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
 
-        inputs = [lang.word2index(word) for word in text]
+        inputs = torch.tensor([lang.word2index[word] for word in text]).to(device)
         outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
         output, hidden = decoder(hidden, outputs)
         loss = criterion(outputs, semantic)
@@ -120,9 +120,9 @@ def test(epoch):
     total = 0
     with torch.no_grad():
         for batch_idx, (text, semantic) in enumerate(dataloaders['test']):
-            inputs, targets = text.to(device), semantic.to(device)
+            inputs, targets = text, semantic.to(device)
 
-            inputs = [lang.word2index(word) for word in text]
+            inputs = torch.tensor([lang.word2index(word) for word in text]).to(device)
             outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
             output, hidden = decoder(hidden, outputs)
 

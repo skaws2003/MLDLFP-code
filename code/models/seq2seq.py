@@ -1,4 +1,5 @@
-from . import *
+from ernn import *
+from rnn import *
 
 import torch
 import torch.nn as nn
