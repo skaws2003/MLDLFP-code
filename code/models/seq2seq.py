@@ -153,7 +153,7 @@ class linear_decoder(nn.Module):
         output = self.out(concat_output)
         output = F.softmax(output, dim=2)
         # Return output and final hidden state
-        return output, hidden
+        return output, last_hidden
 
 
 if __name__ == "__main__":
