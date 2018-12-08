@@ -111,8 +111,8 @@ def train(epoch):
         _, t_index = targets.max(1)
         correct += predicted.eq(t_index).sum().item()
 
-
-        print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+        if batch_idx%(len(dataloaders['train'])//10)==0: #print every 10%
+            print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
 
@@ -139,7 +139,8 @@ def test(epoch):
             _, t_index = targets.max(1)
             correct += predicted.eq(t_index).sum().item()
 
-            print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+            if batch_idx % (len(dataloaders['train']) // 10) == 0:  # print every 10%
+                print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
     # Save checkpoint.
