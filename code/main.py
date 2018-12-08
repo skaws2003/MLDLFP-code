@@ -106,15 +106,15 @@ def train(epoch):
         decoder_optimizer.step()
 
         train_loss += loss.item()
-        print(output)
-        _, predicted = output.max(1)
+        _, predicted = output[0].max(1)
         total += targets.size(0)
-        print(predicted, targets)
-        correct += predicted.eq(targets.max(1)).sum().item()
+        _, t_index = targets.max(1)
+        correct += predicted.eq(t_index).sum().item()
+
 
         print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
-    print(correct/total)
+
 
 def test(epoch):
     global best_acc
@@ -133,13 +133,14 @@ def test(epoch):
 
             loss = criterion(output, targets.type(torch.cuda.LongTensor))
 
-            test_loss += loss.item()
-            _, predicted = output.max(1)
+            train_loss += loss.item()
+            _, predicted = output[0].max(1)
             total += targets.size(0)
-            correct += predicted.eq(targets.max(1)).sum().item()
+            _, t_index = targets.max(1)
+            correct += predicted.eq(t_index).sum().item()
 
-            print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
+            print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+                  % (train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
     # Save checkpoint.
     acc = 100.*correct/total

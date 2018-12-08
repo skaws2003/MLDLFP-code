@@ -19,13 +19,13 @@ class EfficientRNN(nn.Module):
         for i in range(num_split):
             self.rnns.append(nn.GRUCell(self.input_size, self.hidden_size).to(self.device))
 
-        self.selective_layer = nn.Linear(hidden_size + input_size, num_split)  # 2 for bidirection
+        self.selective_layer = nn.Linear(hidden_size + input_size, num_split)
         #self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
     def forward(self, x, hidden=None):
         # Set initial states
         if hidden is None:
-            h0 = torch.zeros(1, 1, self.hidden_size).to(self.device)  # 2 for bidirection
+            h0 = torch.zeros(1, 1, self.hidden_size).to(self.device)
             #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
         else:
             h0 = hidden
