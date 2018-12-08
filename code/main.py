@@ -44,9 +44,9 @@ input_size = 5
 
 lang = Lang('eng')
 for _, (text, _) in enumerate(dataloaders['train']):
-    lang.addSentence(text)
+    lang.addSentence(text[0])
 for _, (text, _) in enumerate(dataloaders['test']):
-    lang.addSentence(text)
+    lang.addSentence(text[0])
 
 embedding = nn.Embedding(lang.n_words, input_size)
 
@@ -89,24 +89,27 @@ def train(epoch):
     correct = 0
     total = 0
     for batch_idx, (text, semantic) in enumerate(dataloaders['train']):
-        inputs, targets = text, torch.tensor([semantic]).to(device)
+        inputs, targets = text, semantic.to(device)
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
 
-        inputs = torch.tensor([[lang.word2index[word] for word in text]]).to(device)
+        inputs = torch.tensor([[lang.word2index[word] for word in text[0]]]).to(device)
         outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
         output, hidden = decoder(hidden, outputs)
 
-        loss = criterion(outputs, semantic)
+
+        loss = criterion(output, targets.type(torch.cuda.LongTensor))
         loss.backward()
 
         encoder_optimizer.step()
         decoder_optimizer.step()
 
         train_loss += loss.item()
-        _, predicted = outputs.max(1)
+        print(output)
+        _, predicted = output.max(1)
         total += targets.size(0)
-        correct += predicted.eq(targets).sum().item()
+        print(predicted, targets)
+        correct += predicted.eq(targets.max(1)).sum().item()
 
         print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
@@ -121,18 +124,18 @@ def test(epoch):
     total = 0
     with torch.no_grad():
         for batch_idx, (text, semantic) in enumerate(dataloaders['test']):
-            inputs, targets = text, torch.tensor([semantic]).to(device)
+            inputs, targets = text, semantic.to(device)
 
-            inputs = torch.tensor([lang.word2index(word) for word in text]).to(device)
+            inputs = torch.tensor([lang.word2index(word) for word in text[0]]).to(device)
             outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(outputs, targets)
+            loss = criterion(output, targets.type(torch.cuda.LongTensor))
 
             test_loss += loss.item()
-            _, predicted = outputs.max(1)
+            _, predicted = output.max(1)
             total += targets.size(0)
-            correct += predicted.eq(targets).sum().item()
+            correct += predicted.eq(targets.max(1)).sum().item()
 
             print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                 % (test_loss/(batch_idx+1), 100.*correct/total, correct, total))
