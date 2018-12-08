@@ -82,7 +82,11 @@ class Polarity_dataset(torch.utils.data.Dataset):
         self.labels = []
         for data in dataset:
             self.sentences.append(data[0])
-            self.labels.append(data[1])
+            if data[1] == POSITIVE:
+                one_hot = torch.Tensor([0,1])
+            elif data[1] == NEGATIVE:
+                one_hot = torch.Tensor([1,0])
+            self.labels.append(one_hot)
 
         pos_file.close()
         neg_file.close()
