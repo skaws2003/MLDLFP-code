@@ -320,3 +320,46 @@ class WEmbedding():
         self.word2vec["SOS"] = [x/(len(sens)-a) for x in first]
         self.word2vec["EOS"] = [x/(len(sens)-a) for x in last]
         self.word2vec["UNKNOWN"] = [x/(len(sens)-a) for x in ran]
+        
+# link to pretrained glove model https://nlp.stanford.edu/projects/glove/
+class GloveSaver():
+    def __init__(self, glove_path):
+        self.words = []
+        idx = 0
+        self.word2idx = {}
+
+        self.vectors = bcolz.carray(np.zeros(1), rootdir=f'{glove_path}/6b.50.dat', mode='w')
+        with open(f'{glove_path}/glove.6B.50d.txt', 'rb') as f:
+            for l in f:
+                line = l.decode().split()
+                word = line[0]
+                self.words.append(word)
+                self.word2idx[word] = idx
+                idx += 1
+                vect = np.array(line[1:]).astype(np.float)
+                self.vectors.append(vect)
+            self.vectors = bcolz.carray(self.vectors[1:].reshape((400000,50)), rootdir=f'{glove_path}/6B.50.dat', mode='w')
+            self.vectors.flush()
+            pickle.dump(self.words, open(f'{glove_path}/6B.50_words.pkl', 'wb'))
+            pickle.dump(self.word2idx, open(f'{glove_path}/6B.50_idx.pkl', 'wb'))
+
+class GloveEmbedder():
+    def __init__(self, glove_path):
+        self.vectors = bcolz.open(f'{glove_path}/6B.50.dat')[:]
+        self.words = pickle.load(open(f'{glove_path}/6B.50_words.pkl', 'rb'))
+        self.word2idx = pickle.load(open(f'{glove_path}/6B.50_idx.pkl', 'rb'))
+        self.mean = np.zeros(50)
+        for i in range(2000):
+            self.mean += self.vectors[i] / 1000
+        self.glove = {w: self.vectors[self.word2idx[w]] for w in self.words}
+
+    def getvec(self, word):
+        if not word in self.glove.keys():
+            return self.mean
+        return self.glove[word]
+
+    def getseq(self, wordseq):
+        returnseq = []
+        for words in wordseq:
+            returnseq.append(self.getvec(words))
+        return returnseq

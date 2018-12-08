@@ -13,8 +13,8 @@ dataloaders = {
 }
 
 if __name__ == "__main__":
-    for i,(text,semantic) in enumerate(dataloaders['train']):
+    for i,data in enumerate(dataloaders['train']):
         if i > 2:
             break
-        print(text)
-        print(semantic)
+        print(data)
+        #print(data[0][1])

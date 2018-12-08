@@ -18,9 +18,12 @@ DATASET_PATH = {
     'negative_test': '../dataset/negative_test.txt'
 }
 
-def unicodeToAscii(s):
+def unicodeToAscii(sentence):
+    """
+    A function for encoding change
+    """
     return ''.join(
-        c for c in unicodedata.normalize('NFD', s)
+        c for c in unicodedata.normalize('NFD', sentence)
         if unicodedata.category(c) != 'Mn'
     )
 
@@ -79,7 +82,11 @@ class Polarity_dataset(torch.utils.data.Dataset):
         self.labels = []
         for data in dataset:
             self.sentences.append(data[0])
-            self.labels.append(data[1])
+            if data[1] == POSITIVE:
+                one_hot = torch.Tensor([0,1])
+            elif data[1] == NEGATIVE:
+                one_hot = torch.Tensor([1,0])
+            self.labels.append(one_hot)
 
         pos_file.close()
         neg_file.close()
@@ -94,4 +101,5 @@ class Polarity_dataloader():
     def __init__(self,dataset):
         self.dataset = dataset
     def __getitem__(self,index):
-        return self.dataset[index]
+        return [self.dataset[index]]
+
