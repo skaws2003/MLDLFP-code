@@ -8,16 +8,8 @@ datasets = {
 }
 
 dataloaders = {
-    'test': torch.utils.data.DataLoader(
-        dataset=datasets['test'],
-        batch_size=1,
-        shuffle=False
-    ),
-    'train': torch.utils.data.DataLoader(
-        dataset=datasets['train'],
-        batch_size=1,
-        shuffle=True
-    )
+    'test': od.Polarity_dataloader(datasets['test']),
+    'train': od.Polarity_dataloader(datasets['train'])
 }
 
 if __name__ == "__main__":
