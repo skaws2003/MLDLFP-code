@@ -101,5 +101,5 @@ class Polarity_dataloader():
     def __init__(self,dataset):
         self.dataset = dataset
     def __getitem__(self,index):
-        return [self.dataset[index]]
+        return [self.dataset[index][0]],self.dataset[index][1]
 
