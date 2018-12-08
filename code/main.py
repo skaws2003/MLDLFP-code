@@ -46,7 +46,7 @@ for _, (text, _) in enumerate(dataloaders['test']):
 
 embedding = nn.Embedding(lang.n_words, input_size)
 
-encoder = EncoderRNN(input_size, hidden_size, embedding, ernn.EfficientRNN, n_layers=1, num_split=-1, dropout=0, device=device).to(device)
+encoder = EncoderRNN(input_size, hidden_size, embedding, ernn.EfficientRNN, n_layers=1, num_split=num_split, dropout=0, device=device).to(device)
 # attn_model = Attn('general', hidden_size)
 # decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
 decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1).to(device)
@@ -107,7 +107,7 @@ def train(epoch):
         _, t_index = targets.max(1)
         correct += predicted.eq(t_index).sum().item()
 
-        if batch_idx%(len(dataloaders['train'])// 20)==0: #print every 10%
+        if batch_idx%(len(dataloaders['train'])// 5)==0: #print every 10%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
@@ -135,13 +135,16 @@ def test(epoch):
             _, t_index = targets.max(1)
             correct += predicted.eq(t_index).sum().item()
 
-            if batch_idx % (len(dataloaders['train']) // 20) == 0:  # print every 10%
+            if batch_idx % (len(dataloaders['train']) // 5) == 0:  # print every 10%
                 print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
     # Save checkpoint.
     acc = 100.*correct/total
     print(acc)
+    with open('log.txt', 'a', encoding='utf8') as logfile:
+        logfile.write("epoch :", str(epoch), ', accuracy :', str(acc)+'\n')
+    '''
     if acc > best_acc:
         print('Saving..  %f' % acc)
         state = {
@@ -154,6 +157,7 @@ def test(epoch):
             #os.mkdir('checkpoint')
         torch.save(state, 'checkpoint/ERNN.t7')
         best_acc = acc
+    '''
 
 
 
