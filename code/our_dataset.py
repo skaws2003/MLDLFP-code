@@ -5,6 +5,7 @@ import torchvision
 import re               # Regular Expressions
 from random import shuffle
 import unicodedata
+import numpy as np
 
 # Some Constants
 POSITIVE=1
@@ -86,7 +87,6 @@ class Polarity_dataset(torch.utils.data.Dataset):
                 one_hot = torch.Tensor([[0,1]])
             elif data[1] == NEGATIVE:
                 one_hot = torch.Tensor([[1,0]])
-            one_hot.type(torch.LongTensor)
             self.labels.append(one_hot)
 
         pos_file.close()
