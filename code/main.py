@@ -143,7 +143,7 @@ def test(epoch):
     acc = 100.*correct/total
     print(acc)
     with open('log.txt', 'a', encoding='utf8') as logfile:
-        logfile.write("epoch :", str(epoch), ', accuracy :', str(acc)+'\n')
+        logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc)+'\n')
     '''
     if acc > best_acc:
         print('Saving..  %f' % acc)
