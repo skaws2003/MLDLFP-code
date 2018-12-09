@@ -122,6 +122,7 @@ class Polarity_dataloader():
             sentences.append(self.dataset[index*self.batch_size+i][0])
             labels.append(self.dataset[index*self.batch_size+i][1])
         labels = torch.Tensor(labels)
+        labels = labels.type(torch.LongTensor)
         return sentences,labels
 
     def __len__(self):

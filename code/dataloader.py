@@ -19,9 +19,9 @@ dataloaders = {
 }
 
 print(len(dataloaders['train']))
+
 if __name__ == "__main__":
     for i,data in enumerate(dataloaders['train']):
         if i > 0:
             break
-        print(data[0])
-        #print(data[0][1])
+        print(data[1].type())
