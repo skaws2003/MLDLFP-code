@@ -19,7 +19,7 @@ from utils import Lang
 from models.seq2seq import *
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
-parser.add_argument('--lr', default=0.1, type=float, help='initial learning rate')
+parser.add_argument('--lr', default=0.1, type=float, help='Initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--predict', action='store_true', help='forward prop')
 args = parser.parse_args()

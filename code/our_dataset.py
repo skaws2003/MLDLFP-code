@@ -107,6 +107,11 @@ class Polarity_dataset(torch.utils.data.Dataset):
 
 class Polarity_dataloader():
     def __init__(self,dataset,batch_size=1):
+        """
+        Fields
+        - dataset: an instance ofr Polarity_dataset
+        - batch_size: batch size
+        """
         self.dataset = dataset
         self.batch_size=batch_size
 
