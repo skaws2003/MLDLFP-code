@@ -9,15 +9,17 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 class EfficientRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3, device = 'cpu'):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3, device = 'cpu', batch_first = True):
         super(EfficientRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
         self.num_classes = num_classes
+        self.num_split = num_split
         self.rnns = []    #dim 0 is split, dim 1 is layer
         self.device = device
         self.layer_weights = torch.nn.Linear(self.hidden_size, self.num_layers)
+        self.batch_first = batch_first
 
 
         for i in range(num_split):
@@ -32,19 +34,22 @@ class EfficientRNN(nn.Module):
 
     def forward(self, x, hidden=None):
         # Set initial states
-        is_packed = isinstance(input, PackedSequence) #check use packed sequence
+        is_packed = isinstance(x, PackedSequence) #check use packed sequence
         if is_packed:
             input, batch_sizes = x
             max_batch_size = batch_sizes[0]
         else:
             batch_sizes = None
-            max_batch_size = x.size(0) if self.batch_first else input.size(1)
+            max_batch_size = x.size(0) if self.batch_first else x.size(1)
 
         if hidden is None:
             h0 = torch.zeros(max_batch_size, self.num_layers, self.hidden_size).to(self.device) #input hidden
             #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
         else:
             h0 = hidden
+
+
+        penalty_layer = torch.ones(max_batch_size, self.num_split) #add penalty layer
 
         cur_cell = 0
         h = torch.zeros(max_batch_size, self.num_layers, self.hidden_size).to(self.device) #hidden initializer
@@ -56,18 +61,21 @@ class EfficientRNN(nn.Module):
         outputs = h[:, -1, :].view(max_batch_size, 1, h.size(1))
         out = h
 
-        for i in range(1, x.size(1)):
+        for i in range(1, x.size(1)): #until end of sequence
+            sum_hidden = h
+
+            if self.num_layers > 1:
+                energy = self.layer_weights(h)
+                layer_energies = torch.sum(hidden * energy, dim=2)
+                sum_hidden = F.softmax(layer_energies, dim=1).unsqueeze(1).bmm(h.transpose(1, 2))
 
 
-            energy = self.layer_weights(h)
-            attn_energies = torch.sum(hidden * energy, dim=2)
-            sum_hidden = F.softmax(attn_energies, dim=1).unsqueeze(1).bmm(h.transpose(1, 2))
-
-
-
-            sum_hidden = self.selective_layer(torch.cat((sum_hidden, x[:,i,:].view(max_batch_size, self.input_size)), dim=1))
+            sum_hidden = self.selective_layer(torch.cat((sum_hidden, x[:,i,:].view(max_batch_size, self.input_size)), dim=1)) #select which cell to use on next
 
             sum_hidden = torch.sum(sum_hidden, dim=0) #use sum of all batch
+
+            ##### need to add penalty layer here
+
             _, cur_cell = sum_hidden.max(1) #we use maximum mean of batch value of linear layer
 
             h = self.rnns[cur_cell](x[:,i,:])
@@ -92,7 +100,7 @@ def test():
     num_classes = 5
     num_split = 3
     net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device).to(device)
-    x = torch.randn(1, 5, 10).to(device) # (batch, seq_length, input_size)
+    x = torch.randn(4, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
     print(y[0].size())
 

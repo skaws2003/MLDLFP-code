@@ -1,4 +1,5 @@
 from . import *
+from rnn import RNN
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
