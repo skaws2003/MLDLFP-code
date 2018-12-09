@@ -34,9 +34,12 @@ print('==> Building model..')
 
 input_size = 128  #same as embedding size
 num_layers = 1
-num_split = 3
+num_split = -1
 hidden_size = 512
 output_size = 2
+#net =  ernn.EfficientRNN
+net =  rnn.RNN
+
 
 lang = Lang('eng')
 for _, (text, _) in enumerate(dataloaders['train']):
@@ -46,7 +49,7 @@ for _, (text, _) in enumerate(dataloaders['test']):
 
 embedding = nn.Embedding(lang.n_words, input_size)
 
-encoder = EncoderRNN(input_size, hidden_size, embedding, ernn.EfficientRNN, n_layers=1, num_split=num_split, dropout=0, device=device).to(device)
+encoder = EncoderRNN(input_size, hidden_size, embedding, net, n_layers=1, num_split=num_split, dropout=0, device=device).to(device)
 # attn_model = Attn('general', hidden_size)
 # decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
 decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1).to(device)

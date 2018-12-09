@@ -18,8 +18,16 @@ class RNN(nn.Module):
 
     def forward(self, x, hidden=None):
         # Set initial states
+        is_packed = isinstance(input, PackedSequence) #check use packed sequence
+        if is_packed:
+            input, batch_sizes = x
+            max_batch_size = batch_sizes[0]
+        else:
+            batch_sizes = None
+            max_batch_size = x.size(0) if self.batch_first else input.size(1)
+
         if hidden is None:
-            h0 = torch.zeros(x.size(0), 1, self.hidden_size).to(self.device)  # 2 for bidirection
+            h0 = torch.zeros(max_batch_size, 1, self.hidden_size).to(self.device)  # 2 for bidirection
             #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
         else:
             h0 = hidden

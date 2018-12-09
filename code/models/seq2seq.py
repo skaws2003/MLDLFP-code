@@ -151,7 +151,6 @@ class linear_decoder(nn.Module):
         concat_output = torch.tanh(self.concat(concat_input))
         # Predict next word using Luong eq. 6
         output = self.out(concat_output)
-        output = F.softmax(output, dim=2)
         # Return output and final hidden state
         return output, last_hidden
 
