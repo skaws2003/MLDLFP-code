@@ -33,7 +33,7 @@ batch_size = 1 # should be 1
 print('==> Building model..')
 
 input_size = 128  #same as embedding size
-num_layers = 1
+num_layers = 1      ###
 num_split = -1
 hidden_size = 512
 output_size = 2
@@ -194,10 +194,9 @@ def predict():
 '''
 
 if __name__ == '__main__':
-
-
     learning_rate = args.lr
 
     for epoch in range(start_epoch, start_epoch+200):
+        dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
