@@ -29,7 +29,7 @@ class RNN(nn.Module):
             max_batch_size = x.size(0) if self.batch_first else input.size(1)
 
         if hidden is None:
-            h0 = torch.zeros(max_batch_size, 1, self.hidden_size).to(self.device)  # 2 for bidirection
+            h0 = torch.zeros(self.num_layers, max_batch_size, self.hidden_size).to(self.device)  # 2 for bidirection
             #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
         else:
             h0 = hidden
@@ -37,7 +37,8 @@ class RNN(nn.Module):
         # Forward propagate LSTM
         out, h = self.gru(x, h0)  # out: tensor of shape (batch_size, seq_length, hidden_size*2) #inputshape = (batch_size, seq_len, input_size)
 
-        return out, h
+
+        return out, h.transpose(0, 1)
 
 def test():
     input_size = 10

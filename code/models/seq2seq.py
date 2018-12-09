@@ -1,9 +1,10 @@
 from . import *
-
+from rnn import RNN
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import itertools
 #from utils.graph_definition import *
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -27,12 +28,12 @@ class EncoderRNN(nn.Module):
         # Convert word indexes to embeddings
         embedded = self.embedding(input_seq)
         # Pack padded batch of sequences for RNN module
-        #packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_lengths, batch_first=True)
+        packed = torch.nn.utils.rnn.pack_padded_sequence(embedded, input_lengths, batch_first=True)
         # Forward pass through GRU
-        outputs, hidden = self.model(embedded, hidden)
+        outputs, hidden = self.model(packed, hidden)
         # Unpack padding
-        #outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
-        # Sum bidirectional GRU outputs
+        outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
+        ##we don't use bidirectional here
         #outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
         # Return output and final hidden state
         return outputs, hidden
@@ -71,11 +72,8 @@ class Attn(torch.nn.Module):
         elif self.method == 'dot':
             attn_energies = self.dot_score(hidden, encoder_outputs)
 
-        # Transpose max_length and batch_size dimensions
-        attn_energies = attn_energies.t()
-
         # Return the softmax normalized probability scores (with added dimension)
-        return F.softmax(attn_energies, dim=1).unsqueeze(1)
+        return F.softmax(attn_energies, dim=1).unsqueeze(2)
 
 class LuongAttnDecoderRNN(nn.Module):
     def __init__(self, attn_model, embedding, hidden_size, output_size, net, n_layers=1, num_split=3, dropout=0.1, device='cpu'):
@@ -140,33 +138,37 @@ class linear_decoder(nn.Module):
 
     def forward(self, last_hidden, encoder_outputs):
         # Note: we run this one step (word) at a time
-        # Get embedding of current input word
         # Calculate attention weights from the current GRU output
         attn_weights = self.attn(last_hidden, encoder_outputs)
         # Multiply attention weights to encoder outputs to get new "weighted sum" context vector
-        context = attn_weights.bmm(encoder_outputs.transpose(0, 1))
-        # Concatenate weighted context vector and GRU output using Luong eq. 5
-        context = torch.sum(context.squeeze(1), dim=0).view(1, 1, -1)
+        context = torch.bmm(attn_weights.transpose(1, 2), encoder_outputs)
+
         concat_input = torch.cat((last_hidden, context), 2)
         concat_output = torch.tanh(self.concat(concat_input))
         # Predict next word using Luong eq. 6
         output = self.out(concat_output)
         # Return output and final hidden state
+        output = F.log_softmax(output, dim=2)
+        output = output.squeeze(1)
         return output, last_hidden
 
+def zeroPadding(l, fillvalue=0):
+    return list(itertools.zip_longest(*l, fillvalue=fillvalue))
 
 if __name__ == "__main__":
     embedding = nn.Embedding(10, 3)
-    hidden_size = 10
+    hidden_size = 4
     output_size = 2
     input_size = 3
+    inputs = torch.LongTensor(zeroPadding([[1,2,3,6], [1, 2, 3, 5, 7], [1, 3, 5, 6, 8, 9 ,0]])).transpose(0, 1)
 
-    encoder = EncoderRNN(input_size, hidden_size, embedding, EfficientRNN, n_layers=1, num_split=-1, dropout=0)
+    encoder = EncoderRNN(input_size, hidden_size, embedding, RNN, n_layers=1, num_split=-1, dropout=0)
     #attn_model = Attn('general', hidden_size)
     #decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
     decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1)
 
-    outputs, hidden = encoder(torch.LongTensor([[1,2,3,4]]), torch.LongTensor([len(seq) for seq in [[3,3,3,3]]]))
+    outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in inputs]))
+    outputs = outputs.transpose(0, 1)
     output, hidden = decoder(hidden, outputs)
     print(output)
 

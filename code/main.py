@@ -94,7 +94,10 @@ def train(epoch):
         decoder_optimizer.zero_grad()
 
         inputs = torch.tensor([[lang.word2index[word] for word in text[0]]]).to(device)
-        outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
+        inputs = torch.LongTensor(zeroPadding(inputs)).transpose(0, 1)
+
+        outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in inputs])) #second input is for packed sequence. not used yet
+        outputs = outputs.transpose(0, 1)
         output, hidden = decoder(hidden, outputs)
 
 
