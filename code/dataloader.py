@@ -14,8 +14,8 @@ datasets = {
 }
 
 dataloaders = {
-    'test': od.Polarity_dataloader(datasets['test'],batch_size=2),
-    'train': od.Polarity_dataloader(datasets['train'],batch_size=2)
+    'test': od.Polarity_dataloader(datasets['test'],batch_size=200),
+    'train': od.Polarity_dataloader(datasets['train'],batch_size=200)
 }
 
 print(len(dataloaders['train']))
