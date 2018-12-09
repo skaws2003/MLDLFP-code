@@ -89,6 +89,9 @@ criterion = nn.NLLLoss()
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
+encoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=encoder_optimizer, factor=0.9, patience=10)
+decoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=decoder_optimizer,factor=0.9,patience=10)
+
 
 # Training
 def train(epoch):
@@ -123,10 +126,11 @@ def train(epoch):
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
-        if batch_idx%(len(dataloaders['train'])// 5)==0: #print every 20%
+        if batch_idx%(len(dataloaders['train'])// 2)==0: #print every 50%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
+    encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
 
 def test(epoch):
     global best_acc
@@ -203,7 +207,6 @@ def predict():
 
 if __name__ == '__main__':
     learning_rate = args.lr
-
     for epoch in range(start_epoch, start_epoch+200):
         dataloaders['train'].shuffle()
         train(epoch)
