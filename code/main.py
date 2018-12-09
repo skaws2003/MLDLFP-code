@@ -158,7 +158,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            if batch_idx % (len(dataloaders['test']) // 5) == 0:  # print every 10%
+            if batch_idx % (len(dataloaders['test']) // 2) == 0:  # print every 50%
                 print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
