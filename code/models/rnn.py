@@ -2,23 +2,25 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils.rnn import PackedSequence
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class RNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, device = 'cpu'):
+    def __init__(self, input_size, hidden_size, num_layers, device = 'cpu', batch_first = True):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
         self.device = device
+        self.batch_first = True
         self.gru = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False)
         #self.fc = nn.Linear(self.hidden_size, num_classes)
 
     def forward(self, x, hidden=None):
         # Set initial states
-        is_packed = isinstance(input, PackedSequence) #check use packed sequence
+        is_packed = isinstance(x, PackedSequence) #check use packed sequence
         if is_packed:
             input, batch_sizes = x
             max_batch_size = batch_sizes[0]
