@@ -43,9 +43,11 @@ net =  rnn.RNN
 
 lang = Lang('eng')
 for _, (text, _) in enumerate(dataloaders['train']):
-    lang.addSentence(text[0])
+    for i in range(len(text)):
+        lang.addSentence(text[i])
 for _, (text, _) in enumerate(dataloaders['test']):
-    lang.addSentence(text[0])
+    for i in range(len(text)):
+        lang.addSentence(text[i])
 
 embedding = nn.Embedding(lang.n_words, input_size)
 
@@ -93,22 +95,24 @@ def train(epoch):
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
 
-        inputs = torch.tensor([[lang.word2index[word] for word in text[0]]]).to(device)
-        inputs = torch.LongTensor(zeroPadding(inputs)).transpose(0, 1)
+        inputs = [[lang.word2index[word] for word in text[i]] for i in range(len(text))]
+        inputs = torch.LongTensor(zeroPadding(inputs)).transpose(0, 1).to(device)
+
 
         outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in inputs])) #second input is for packed sequence. not used yet
         outputs = outputs.transpose(0, 1)
         output, hidden = decoder(hidden, outputs)
 
 
-        loss = criterion(output[0], targets)
+        print(output.size(), targets.size())
+        loss = criterion(output, targets)
         loss.backward()
 
         encoder_optimizer.step()
         decoder_optimizer.step()
 
         train_loss += loss.item()
-        _, predicted = output[0].max(1)
+        _, predicted = output.max(1)
         total += targets.size(0)
         _, t_index = targets.max(1)
         correct += predicted.eq(t_index).sum().item()
@@ -133,10 +137,10 @@ def test(epoch):
             outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(output[0], targets)
+            loss = criterion(output, targets)
 
             test_loss += loss.item()
-            _, predicted = output[0].max(1)
+            _, predicted = output.max(1)
             total += targets.size(0)
             _, t_index = targets.max(1)
             correct += predicted.eq(t_index).sum().item()
