@@ -37,10 +37,15 @@ num_layers = 1      ###
 num_split = -1
 hidden_size = 512
 output_size = 2
+batch_size = 200
 #net =  ernn.EfficientRNN
 net =  rnn.RNN
 
+# Set batch size to 1 for embedding
+dataloaders['train'].set_batch_size(1)
+dataloaders['test'].set_batch_size(1)
 
+# Word embedding
 lang = Lang('eng')
 for _, (text, _) in enumerate(dataloaders['train']):
     for i in range(len(text)):
@@ -48,6 +53,9 @@ for _, (text, _) in enumerate(dataloaders['train']):
 for _, (text, _) in enumerate(dataloaders['test']):
     for i in range(len(text)):
         lang.addSentence(text[i])
+
+dataloaders['train'].set_batch_size(batch_size)
+dataloaders['test'].set_batch_size(batch_size)
 
 embedding = nn.Embedding(lang.n_words, input_size)
 
