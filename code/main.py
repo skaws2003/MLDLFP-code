@@ -33,14 +33,19 @@ batch_size = 1 # should be 1
 print('==> Building model..')
 
 input_size = 128  #same as embedding size
-num_layers = 1
+num_layers = 1      ###
 num_split = -1
 hidden_size = 512
 output_size = 2
+batch_size = 200
 #net =  ernn.EfficientRNN
 net =  rnn.RNN
 
+# Set batch size to 1 for embedding
+dataloaders['train'].set_batch_size(1)
+dataloaders['test'].set_batch_size(1)
 
+# Word embedding
 lang = Lang('eng')
 for _, (text, _) in enumerate(dataloaders['train']):
     for i in range(len(text)):
@@ -48,6 +53,9 @@ for _, (text, _) in enumerate(dataloaders['train']):
 for _, (text, _) in enumerate(dataloaders['test']):
     for i in range(len(text)):
         lang.addSentence(text[i])
+
+dataloaders['train'].set_batch_size(batch_size)
+dataloaders['test'].set_batch_size(batch_size)
 
 embedding = nn.Embedding(lang.n_words, input_size)
 
@@ -80,6 +88,9 @@ if args.resume:
 criterion = nn.NLLLoss()
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
+
+encoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=encoder_optimizer, factor=0.9, patience=10)
+decoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=decoder_optimizer,factor=0.9,patience=10)
 
 
 # Training
@@ -115,10 +126,11 @@ def train(epoch):
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
-        if batch_idx%(len(dataloaders['train'])// 5)==0: #print every 20%
+        if batch_idx%(len(dataloaders['train'])// 2)==0: #print every 50%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
+    encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
 
 def test(epoch):
     global best_acc
@@ -146,7 +158,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            if batch_idx % (len(dataloaders['test']) // 5) == 0:  # print every 10%
+            if batch_idx % (len(dataloaders['test']) // 2) == 0:  # print every 50%
                 print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
@@ -194,10 +206,8 @@ def predict():
 '''
 
 if __name__ == '__main__':
-
-
     learning_rate = args.lr
-
     for epoch in range(start_epoch, start_epoch+200):
+        dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)

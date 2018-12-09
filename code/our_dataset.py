@@ -3,7 +3,7 @@
 import torch
 import torchvision
 import re               # Regular Expressions
-from random import shuffle
+import random
 import unicodedata
 import numpy as np
 
@@ -69,23 +69,42 @@ class Polarity_dataset(torch.utils.data.Dataset):
         pos = pos_file.readlines()
         neg = neg_file.readlines()
 
-        dataset = []
+        self.dataset = []
 
+        # Data Reading
         for sent in pos:
             sent_normalized = normalizeString(sent)
             sent_tokenized = sentence_to_word(sent_normalized)
-            dataset.append((sent_tokenized,POSITIVE))
-
+            self.dataset.append((sent_tokenized,POSITIVE))
         for sent in neg:
             sent_normalized = normalizeString(sent)
             sent_tokenized = sentence_to_word(sent_normalized)
-            dataset.append((sent_tokenized,NEGATIVE))
-        
-        shuffle(dataset)
-        
+            self.dataset.append((sent_tokenized,NEGATIVE))
+
+        self.shuffle()
+        pos_file.close()
+        neg_file.close()
+
+    def __len__(self):
+        return len(self.sentences)
+
+    def __getitem__(self,index):
+        return self.sentences[index], self.labels[index]
+
+    def shuffle(self):
+        """
+        Shuffles dataset. Then set the sentence and labels/
+        """
+        random.shuffle(self.dataset)
+        self._set_data()
+
+    def _set_data(self):
+        """
+        Set data with self.dataset
+        """
         self.sentences = []
         self.labels = []
-        for data in dataset:
+        for data in self.dataset:
             self.sentences.append(data[0])
             if self.one_hot == True:
                 if data[1] == POSITIVE:
@@ -96,14 +115,6 @@ class Polarity_dataset(torch.utils.data.Dataset):
             else:
                 self.labels.append(data[1])
 
-        pos_file.close()
-        neg_file.close()
-
-    def __len__(self):
-        return len(self.sentences)
-
-    def __getitem__(self,index):
-        return self.sentences[index], self.labels[index]
 
 class Polarity_dataloader():
     def __init__(self,dataset,batch_size=1):
@@ -127,3 +138,9 @@ class Polarity_dataloader():
 
     def __len__(self):
         return len(self.dataset) // self.batch_size
+
+    def shuffle(self):
+        self.dataset.shuffle()
+
+    def set_batch_size(self,batch_size):
+        self.batch_size = batch_size
