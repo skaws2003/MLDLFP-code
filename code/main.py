@@ -77,7 +77,7 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-criterion = nn.MSELoss()
+criterion = nn.NLLLoss()
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
@@ -104,7 +104,6 @@ def train(epoch):
         output, hidden = decoder(hidden, outputs)
 
 
-        print(output.size(), targets.size())
         loss = criterion(output, targets)
         loss.backward()
 
@@ -114,8 +113,7 @@ def train(epoch):
         train_loss += loss.item()
         _, predicted = output.max(1)
         total += targets.size(0)
-        _, t_index = targets.max(1)
-        correct += predicted.eq(t_index).sum().item()
+        correct += predicted.eq(targets).sum().item()
 
         if batch_idx%(len(dataloaders['train'])// 5)==0: #print every 20%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
@@ -133,8 +131,12 @@ def test(epoch):
         for batch_idx, (text, semantic) in enumerate(dataloaders['test']):
             inputs, targets = text, semantic.to(device)
 
-            inputs = torch.tensor([[lang.word2index[word] for word in text[0]]]).to(device)
-            outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in [[3, 3, 3, 3]]])) #second input is for packed sequence. not used yet
+            inputs = [[lang.word2index[word] for word in text[i]] for i in range(len(text))]
+            inputs = torch.LongTensor(zeroPadding(inputs)).transpose(0, 1).to(device)
+
+            outputs, hidden = encoder(inputs, torch.LongTensor(
+                [len(seq) for seq in inputs]))  # second input is for packed sequence. not used yet
+            outputs = outputs.transpose(0, 1)
             output, hidden = decoder(hidden, outputs)
 
             loss = criterion(output, targets)
@@ -142,8 +144,7 @@ def test(epoch):
             test_loss += loss.item()
             _, predicted = output.max(1)
             total += targets.size(0)
-            _, t_index = targets.max(1)
-            correct += predicted.eq(t_index).sum().item()
+            correct += predicted.eq(targets).sum().item()
 
             if batch_idx % (len(dataloaders['test']) // 5) == 0:  # print every 10%
                 print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
