@@ -19,7 +19,7 @@ from utils import Lang
 from models.seq2seq import *
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
-parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
+parser.add_argument('--lr', default=0.1, type=float, help='initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--predict', action='store_true', help='forward prop')
 args = parser.parse_args()
@@ -110,7 +110,7 @@ def train(epoch):
         _, t_index = targets.max(1)
         correct += predicted.eq(t_index).sum().item()
 
-        if batch_idx%(len(dataloaders['train'])// 5)==0: #print every 10%
+        if batch_idx%(len(dataloaders['train'])// 5)==0: #print every 20%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 

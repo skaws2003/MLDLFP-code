@@ -54,15 +54,17 @@ def normalizeString(sentence):
     return s
 
 class Polarity_dataset(torch.utils.data.Dataset):
-    def __init__(self,pos_path,neg_path):
+    def __init__(self,pos_path,neg_path,one_hot=True):
         """
         Dataset class for Polarity dataset
         Fields
         - pos_data: file path to positive dataset txt file
         - neg_data: file path to negative dataset txt file
+        - one_hot: if true, polarity will be encoded by one-hot scheme.
         """
         pos_file = open(pos_path, encoding='utf8')
         neg_file = open(neg_path, encoding='utf8')
+        self.one_hot = one_hot
 
         pos = pos_file.readlines()
         neg = neg_file.readlines()
@@ -85,11 +87,14 @@ class Polarity_dataset(torch.utils.data.Dataset):
         self.labels = []
         for data in dataset:
             self.sentences.append(data[0])
-            if data[1] == POSITIVE:
-                one_hot = torch.Tensor([[0,1]])
-            elif data[1] == NEGATIVE:
-                one_hot = torch.Tensor([[1,0]])
-            self.labels.append(one_hot)
+            if self.one_hot == True:
+                if data[1] == POSITIVE:
+                    one_hot = [0,1]
+                elif data[1] == NEGATIVE:
+                    one_hot = [1,0]
+                self.labels.append(one_hot)
+            else:
+                self.labels.append(data[1])
 
         pos_file.close()
         neg_file.close()
@@ -101,10 +106,18 @@ class Polarity_dataset(torch.utils.data.Dataset):
         return self.sentences[index], self.labels[index]
 
 class Polarity_dataloader():
-    def __init__(self,dataset):
+    def __init__(self,dataset,batch_size=1):
         self.dataset = dataset
-    def __getitem__(self,index):
-        return [self.dataset[index][0]],self.dataset[index][1]
-    def __len__(self):
-        return len(self.dataset)
+        self.batch_size=batch_size
 
+    def __getitem__(self,index):
+        sentences = []
+        labels = []
+        for i in range(self.batch_size):
+            sentences.append(self.dataset[index*self.batch_size+i][0])
+            labels.append(self.dataset[index*self.batch_size+i][1])
+        labels = torch.Tensor(labels)
+        return sentences,labels
+
+    def __len__(self):
+        return len(self.dataset) // self.batch_size
