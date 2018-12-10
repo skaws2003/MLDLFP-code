@@ -46,8 +46,8 @@ hidden_size = args.hidden_size
 output_size = 2
 batch_size = args.batch_size
 if args.arch=='ernn':
-    net =  ernn.EfficientRNN
-if args.arch=='rnn':
+    net=ernn.EfficientRNN
+else:
     net=rnn.RNN
 
 
