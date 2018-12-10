@@ -54,6 +54,7 @@ class DARNN(nn.Module):
         weight = F.softmax(weight, dim=2)
         out_total, h_total = self.split_grus[0](input, h0)
 
+        print(weight.size(), weight)
 
         mat = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
         w = weight[:,:,0].unsqueeze(2).bmm(mat)
@@ -69,7 +70,7 @@ class DARNN(nn.Module):
 
         out_total = torch.sum(out_total, 3)
 
-        return out_total.transpose(0, 1), out_total[:,-1,:]
+        return out_total.transpose(0, 1), out_total[:,-1,:], weight
 
 def test():
     input_size = 10
@@ -77,7 +78,7 @@ def test():
     seq_length = 5
     num_layers = 2
     num_classes = 5
-    net = FKRNN(input_size, hidden_size, num_layers, device=device).to(device)
+    net = DARNN(input_size, hidden_size, num_layers, device=device).to(device)
     x = torch.randn(3, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
     print(y[0].size())

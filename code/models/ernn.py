@@ -114,7 +114,7 @@ def test():
     num_layers = 2
     num_classes = 2
     num_split = 3
-    net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device).to(device)
+    net = NTRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device).to(device)
     x = torch.rand(batch_size, seq_length, input_size).to(device) # (batch, seq_length, input_size)
     y, h = net(x)
     print(y.size())
