@@ -119,6 +119,7 @@ def train(epoch):
     correct = 0
     total = 0
     for batch_idx, (text, semantic) in enumerate(dataloaders['train']):
+        state_bfore = encoder.state_dict()
         inputs, targets = text, semantic.to(device)
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
@@ -142,11 +143,13 @@ def train(epoch):
         _, predicted = output.max(1)
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
-
+        
         if batch_idx%(len(dataloaders['train'])// 2) == 0 and args.silent: #print every 50%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
+        state_after = encoder.state_dict()
+        grad = state_bfore - state_after
     encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
     decoder_scheduler.step(metrics=train_loss)
 
