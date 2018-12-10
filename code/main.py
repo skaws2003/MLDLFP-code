@@ -29,10 +29,17 @@ parser.add_argument('--silent', action='store_false', help='Only print test resu
 parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
 parser.add_argument('--arch', default='ernn', help='Network architecture')
 parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
+parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
 args = parser.parse_args()
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+if args.cuda==0:
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+elif args.cuda==1:
+    device = 'cuda:1' if torch.cuda.is_available() else 'cpu'
+else:
+    print("Not a valid cuda")
+
 best_acc = 0  # best test accuracy
 start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 
