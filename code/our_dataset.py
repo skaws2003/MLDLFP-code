@@ -144,3 +144,6 @@ class Polarity_dataloader():
 
     def set_batch_size(self,batch_size):
         self.batch_size = batch_size
+
+    def get_batch_size(self):
+        return batch_size

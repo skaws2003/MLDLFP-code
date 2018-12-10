@@ -25,6 +25,7 @@ parser.add_argument('--resume', '-r', action='store_true', help='resume from che
 parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
+parser.add_argument('--silent', action='store_false', help='Only print test result')
 
 args = parser.parse_args()
 
@@ -130,7 +131,7 @@ def train(epoch):
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
 
-        if batch_idx%(len(dataloaders['train'])// 2)==0: #print every 50%
+        if batch_idx%(len(dataloaders['train'])// 2) == 0 and args.silent: #print every 50%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
@@ -163,7 +164,7 @@ def test(epoch):
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            if batch_idx % (len(dataloaders['test']) // 2) == 0:  # print every 50%
+            if batch_idx % (len(dataloaders['test']) // 2) == 0 and args.silent:  # print every 50%
                 print(batch_idx, len(dataloaders['test']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
                   % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
@@ -218,5 +219,8 @@ if __name__ == '__main__':
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
+        if epoch//3 == 0 and epoch != 0:
+            if dataloaders['train'] > 1:
+                dataloaders['train'].set_batch_size(dataloaders['train'].get_batch_size//2)
         print("time took for epoch: %f"%(time.time()-epoch_time))
     print("time took for all: %f"%(time.time()-all_time))
