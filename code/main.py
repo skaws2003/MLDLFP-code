@@ -134,7 +134,7 @@ def train(epoch):
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
-    encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
+    #encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
 
 def test(epoch):
     global best_acc
