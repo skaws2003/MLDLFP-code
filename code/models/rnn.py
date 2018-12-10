@@ -37,8 +37,7 @@ class RNN(nn.Module):
         # Forward propagate LSTM
         out, h = self.gru(x, h0)  # out: tensor of shape (batch_size, seq_length, hidden_size*2) #inputshape = (batch_size, seq_len, input_size)
 
-
-        return out, h.transpose(0, 1)
+        return out, h.transpose(0, 1)[:,-1,:]
 
 def test():
     input_size = 10

@@ -2,6 +2,7 @@ from . import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils.rnn import PackedSequence
 import numpy as np
 import itertools
 #from utils.graph_definition import *
@@ -31,7 +32,9 @@ class EncoderRNN(nn.Module):
         # Forward pass through GRU
         outputs, hidden = self.model(packed, hidden)
         # Unpack padding
-        outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
+        is_packed = isinstance(outputs, PackedSequence) #check use packed sequence
+        if is_packed:
+            outputs, _ = torch.nn.utils.rnn.pad_packed_sequence(outputs)
         ##we don't use bidirectional here
         #outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
         # Return output and final hidden state
@@ -163,13 +166,13 @@ if __name__ == "__main__":
     input_size = 3
     inputs = torch.LongTensor(zeroPadding([[1,2,3], [1, 2, 3, 5, 7]])).transpose(0, 1)
 
-    encoder = EncoderRNN(input_size, hidden_size, embedding, EfficientRNN, n_layers=1, num_split=-1, dropout=0)
+    encoder = EncoderRNN(input_size, hidden_size, embedding, EfficientRNN, n_layers=3, num_split=-1, dropout=0)
     #attn_model = Attn('general', hidden_size)
     #decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
     decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1)
 
-    outputs, hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in inputs]))
+    outputs, last_hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in inputs]))
     outputs = outputs.transpose(0, 1)
-    output, hidden = decoder(hidden, outputs)
+    output, hidden = decoder(last_hidden.unsqueeze(1), outputs)
     print(output)
 
