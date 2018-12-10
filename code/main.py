@@ -39,8 +39,8 @@ print('==> Building model..')
 
 input_size = 128  #same as embedding size
 num_layers = 2      ###
-num_split = -1
-hidden_size = 512
+num_split = 5
+hidden_size = 128
 output_size = 2
 batch_size = args.batch_size
 net =  ernn.EfficientRNN
