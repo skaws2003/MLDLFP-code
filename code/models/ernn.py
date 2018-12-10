@@ -50,7 +50,7 @@ class EfficientRNN(nn.Module):
             h0 = hidden
 
 
-        penalty_layer = torch.ones(1, self.num_split).to(self.device) #add penalty layer
+        penalty_layer = torch.ones(1, self.num_split, requires_grad=False).to(self.device) #add penalty layer
         cur_cell = 0
 
 
@@ -73,18 +73,18 @@ class EfficientRNN(nn.Module):
 
             #finding which cell to use
 
-            sum_hidden = h
+            sum_hidden = self.layer_weights(h)
             if self.num_layers > 1:
                 energy = self.layer_weights(h)
                 layer_energies = torch.sum(energy, dim=2)
-                sum_hidden = F.softmax(layer_energies, dim=1).unsqueeze(1).bmm(h)
+                sum_hidden = layer_energies.unsqueeze(1).bmm(h)
             sum_hidden = sum_hidden.squeeze(1)
 
-            sum_hidden = self.selective_layer(torch.cat((sum_hidden, input[:,i,:].squeeze(1)), dim=1)) #select which cell to use on next
 
-            sum_hidden = F.softmax(sum_hidden, dim=1)*penalty_layer
+            sum_hidden = self.selective_layer(torch.cat((sum_hidden, input[:,i,:].squeeze(1)), dim=1)) #select which cell to use on next
             sum_hidden = torch.sum(sum_hidden, dim=0) #use sum of all batch
 
+            sum_hidden = F.softmax(sum_hidden, dim=1)*penalty_layer
             _, cur_cell = sum_hidden.max(0) #we use maximum mean of batch value of linear layer
 
             h_c = self.rnns[cur_cell][0](input[:, i, :]).view(max_batch_size, 1, self.hidden_size)  # continue prop
