@@ -235,6 +235,6 @@ if __name__ == '__main__':
             if dataloaders['train'].get_batch_size() > 1:
                 dataloaders['train'].set_batch_size(dataloaders['train'].get_batch_size()//2)
                 print("batch decay. Now size: %d"%dataloaders['train'].get_batch_size())
-        print(EncoderRNN.state_dict())
+        print(encoder.state_dict())
         print("time took for epoch: %f"%(time.time()-epoch_time))
     print("time took for all: %f"%(time.time()-all_time))
