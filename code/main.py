@@ -222,5 +222,6 @@ if __name__ == '__main__':
         if epoch//3 == 0 and epoch != 0:
             if dataloaders['train'].get_batch_size() > 1:
                 dataloaders['train'].set_batch_size(dataloaders['train'].get_batch_size()//2)
+                print("batch decay. Now size: %d"dataloaders['train'].get_batch_size())
         print("time took for epoch: %f"%(time.time()-epoch_time))
     print("time took for all: %f"%(time.time()-all_time))
