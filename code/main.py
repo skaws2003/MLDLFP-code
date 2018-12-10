@@ -69,10 +69,10 @@ dataloaders['test'].set_batch_size(batch_size)
 
 embedding = nn.Embedding(lang.n_words, input_size, padding_idx=0)
 
-encoder = EncoderRNN(input_size, hidden_size, embedding, net, n_layers=1, num_split=num_split, dropout=0, device=device).to(device)
+encoder = EncoderRNN(input_size, hidden_size, embedding, net, n_layers=num_layers, num_split=num_split, dropout=0, device=device).to(device)
 # attn_model = Attn('general', hidden_size)
 # decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
-decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1).to(device)
+decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=num_layers, num_split=3, dropout=0.1).to(device)
 
 #checkpoint = torch.load('checkpoint/ERNN.t7')
 #net.load_state_dict(checkpoint['net'])
