@@ -46,8 +46,8 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = 5  #same as embedding size
-num_layers = 2      ###
+input_size = 128  #same as embedding size
+num_layers = 1      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
 output_size = 2
@@ -55,9 +55,9 @@ batch_size = args.batch_size
 #if args.arch=='ernn':
 #net=ernn.NTRNN
 #elif args.arch=='darnn':
-net=darnn.DARNN
+#net=darnn.DARNN
 #else:
-#    net=rnn.RNN
+net=rnn.RNN
 
 
 # Set batch size to 1 for embedding
