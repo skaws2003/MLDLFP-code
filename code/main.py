@@ -22,6 +22,9 @@ parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
 parser.add_argument('--lr', default=0.1, type=float, help='Initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--predict', action='store_true', help='forward prop')
+parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
+parser.add_argument('--epoch', default=200, type=int, help='define epoch')
+
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -37,7 +40,7 @@ num_layers = 1      ###
 num_split = -1
 hidden_size = 512
 output_size = 2
-batch_size = 200
+batch_size = args.batch_size
 #net =  ernn.EfficientRNN
 net =  rnn.RNN
 
@@ -207,7 +210,7 @@ def predict():
 
 if __name__ == '__main__':
     learning_rate = args.lr
-    for epoch in range(start_epoch, start_epoch+200):
+    for epoch in range(start_epoch, start_epoch+args.epoch):
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)

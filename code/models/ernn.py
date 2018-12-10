@@ -37,6 +37,7 @@ class EfficientRNN(nn.Module):
         if is_packed:
             input, batch_sizes = x
             max_batch_size = batch_sizes[0]
+            input=input.view(max_batch_size, -1, self.input_size)
         else:
             batch_sizes = None
             max_batch_size = x.size(0) if self.batch_first else x.size(1)
