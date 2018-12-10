@@ -115,7 +115,6 @@ class Polarity_dataset(torch.utils.data.Dataset):
             else:
                 self.labels.append(data[1])
 
-
 class Polarity_dataloader():
     def __init__(self,dataset,batch_size=1):
         """
@@ -147,3 +146,7 @@ class Polarity_dataloader():
 
     def get_batch_size(self):
         return self.batch_size
+
+class IDMB_dataloader(torch.utils.data.DataLoader):
+    def __init__(self):
+        NotImplemented
