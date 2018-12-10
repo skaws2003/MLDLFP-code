@@ -57,7 +57,7 @@ for _, (text, _) in enumerate(dataloaders['test']):
 dataloaders['train'].set_batch_size(batch_size)
 dataloaders['test'].set_batch_size(batch_size)
 
-embedding = nn.Embedding(lang.n_words, input_size)
+embedding = nn.Embedding(lang.n_words, input_size, padding_idx=0)
 
 encoder = EncoderRNN(input_size, hidden_size, embedding, net, n_layers=1, num_split=num_split, dropout=0, device=device).to(device)
 # attn_model = Attn('general', hidden_size)

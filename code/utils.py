@@ -168,8 +168,8 @@ class Lang:  # ont-hot vector 인코딩 다른 embedding 필요 language
         self.name = name
         self.word2index = {}
         self.word2count = {}
-        self.index2word = {0: "SOS", 1: "EOS", 2:"UNKNOWN"}
-        self.n_words = 3  # Count SOS and EOS
+        self.index2word = {0:'padding index', 1: "SOS", 2: "EOS", 3:"UNKNOWN"}
+        self.n_words = 4 # Count SOS and EOS
 
     def addSentence(self, sentence):  # tokenizer 한국어
         for word in sentence:

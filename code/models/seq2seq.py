@@ -1,5 +1,6 @@
 from . import *
-#from rnn import RNN
+from rnn import RNN
+from ernn import EfficientRNN
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -156,13 +157,13 @@ def zeroPadding(l, fillvalue=0):
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
 
 if __name__ == "__main__":
-    embedding = nn.Embedding(10, 3)
+    embedding = nn.Embedding(10, 3, padding_idx=0)
     hidden_size = 4
     output_size = 2
     input_size = 3
-    inputs = torch.LongTensor(zeroPadding([[1,2,3,6], [1, 2, 3, 5, 7], [1, 3, 5, 6, 8, 9 ,0]])).transpose(0, 1)
+    inputs = torch.LongTensor(zeroPadding([[1,2,3], [1, 2, 3, 5, 7]])).transpose(0, 1)
 
-    encoder = EncoderRNN(input_size, hidden_size, embedding, RNN, n_layers=1, num_split=-1, dropout=0)
+    encoder = EncoderRNN(input_size, hidden_size, embedding, EfficientRNN, n_layers=1, num_split=-1, dropout=0)
     #attn_model = Attn('general', hidden_size)
     #decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
     decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1)

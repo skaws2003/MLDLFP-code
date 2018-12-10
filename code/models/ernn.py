@@ -20,7 +20,6 @@ class EfficientRNN(nn.Module):
         self.device = device
         self.layer_weights = torch.nn.Linear(self.hidden_size, self.hidden_size)
         self.batch_first = batch_first
-        self.penalty = penalty
 
         for i in range(num_split):
             l = []
@@ -32,7 +31,7 @@ class EfficientRNN(nn.Module):
         self.selective_layer = nn.Linear(hidden_size + input_size, num_split)
         #self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
-    def forward(self, x, hidden=None):
+    def forward(self, x, hidden=None, penalty=0.5):
         # Set initial states
         is_packed = isinstance(x, PackedSequence) #check use packed sequence
         if is_packed:
@@ -41,6 +40,7 @@ class EfficientRNN(nn.Module):
         else:
             batch_sizes = None
             max_batch_size = x.size(0) if self.batch_first else x.size(1)
+            input = x
 
         if hidden is None:
             h0 = torch.zeros(max_batch_size, self.num_layers, self.hidden_size).to(self.device) #input hidden
@@ -53,21 +53,22 @@ class EfficientRNN(nn.Module):
 
         cur_cell = 0
 
-        h_c = self.rnns[cur_cell][0](x[:, 0, :]).view(max_batch_size, 1, self.hidden_size) #first layer prop
+        print(input, batch_sizes)
+        h_c = self.rnns[cur_cell][0](input[:, 0, :]).view(max_batch_size, 1, self.hidden_size) #first layer prop
         h = h_c
         for i in range(1, self.num_layers):
             h_c = self.rnns[cur_cell][i](h[:, i-1, :]).view(max_batch_size, 1, self.hidden_size)
             h = torch.cat((h, h_c), dim=1)
 
 
-        penalty_layer[0,cur_cell] = self.penalty*penalty_layer[0,cur_cell]
+        penalty_layer[0,cur_cell] = penalty*penalty_layer[0,cur_cell]
         penalty_layer[0] = penalty_layer[0]/penalty_layer.max(1)[0]
 
         outputs = h_c
 
         #first prop end
 
-        for i in range(1, x.size(1)): #until end of sequence
+        for i in range(1, input.size(1)): #until end of sequence
 
             #finding which cell to use
             if self.num_layers > 1:
@@ -91,7 +92,7 @@ class EfficientRNN(nn.Module):
                 h_c = self.rnns[cur_cell][i](h[:, i-1, :]).view(max_batch_size, 1, self.hidden_size)
                 h = torch.cat((h, h_c), dim=1)
 
-            penalty_layer[0, cur_cell] = self.penalty * penalty_layer[0, cur_cell]
+            penalty_layer[0, cur_cell] = penalty * penalty_layer[0, cur_cell]
             penalty_layer[0] = penalty_layer[0] / penalty_layer.max(1)[0]
 
             outputs = torch.cat((outputs, h_c), dim=1)
