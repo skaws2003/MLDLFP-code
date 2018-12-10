@@ -149,7 +149,13 @@ def train(epoch):
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
         state_after = encoder.state_dict()
-        grad = state_bfore - state_after
+        grad = {}
+        for key in state_bfore.keys():
+            grad[key] = state_after[key] - state_bfore[key]
+        fil = open("grad.txt",'w')
+        fil.write(grad)
+        fil.close()
+
     encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
     decoder_scheduler.step(metrics=train_loss)
 
