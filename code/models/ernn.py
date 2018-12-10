@@ -31,7 +31,7 @@ class EfficientRNN(nn.Module):
         self.selective_layer = nn.Linear(hidden_size + input_size, num_split)
         #self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
-    def forward(self, x, hidden=None, penalty=0.5):
+    def forward(self, x, hidden=None, penalty=0.9):
         # Set initial states
         is_packed = isinstance(x, PackedSequence) #check use packed sequence
         if is_packed:
