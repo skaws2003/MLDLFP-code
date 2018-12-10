@@ -59,7 +59,6 @@ class Attn(torch.nn.Module):
 
     def general_score(self, hidden, encoder_output):
         energy = self.attn(encoder_output)
-        print(hidden.size(), energy.size())
         return torch.sum(hidden * energy, dim=2)
 
     def concat_score(self, hidden, encoder_output):
