@@ -12,6 +12,7 @@ import torchvision.transforms as transforms
 
 import os
 import argparse
+import time
 
 from models import *
 from dataloader import *
@@ -169,7 +170,7 @@ def test(epoch):
     acc = 100.*correct/total
     print(acc)
     with open('log.txt', 'a', encoding='utf8') as logfile:
-        logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc)+'\n')
+        logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc)'\n')
     '''
     if acc > best_acc:
         print('Saving..  %f' % acc)
@@ -210,7 +211,11 @@ def predict():
 
 if __name__ == '__main__':
     learning_rate = args.lr
+    all_time = time.time()
     for epoch in range(start_epoch, start_epoch+args.epoch):
+        epoch_time = time.time()
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
+        print("time took for epoch: %f"%(time.time()-epoch_time))
+    print("time took for all: %f"%(time.time()-all_time))
