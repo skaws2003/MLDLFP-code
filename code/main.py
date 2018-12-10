@@ -46,7 +46,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = 128  #same as embedding size
+input_size = 5  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
@@ -235,6 +235,5 @@ if __name__ == '__main__':
             if dataloaders['train'].get_batch_size() > 1:
                 dataloaders['train'].set_batch_size(dataloaders['train'].get_batch_size()//2)
                 print("batch decay. Now size: %d"%dataloaders['train'].get_batch_size())
-        print(encoder.state_dict())
         print("time took for epoch: %f"%(time.time()-epoch_time))
     print("time took for all: %f"%(time.time()-all_time))
