@@ -50,7 +50,7 @@ class EfficientRNN(nn.Module):
             h0 = hidden
 
 
-        penalty_layer = torch.ones(self.num_split, requires_grad=False).to(self.device) #add penalty layer
+        penalty_layer = torch.ones(self.num_split).to(self.device) #add penalty layer
         cur_cell = 0
 
 
@@ -61,7 +61,7 @@ class EfficientRNN(nn.Module):
             h = torch.cat((h, h_c), dim=1)
         last_hidden = h
 
-
+        #add penalty layer
         penalty_layer[cur_cell] = penalty*penalty_layer[cur_cell]
         penalty_layer = penalty_layer/penalty_layer.max()
 
