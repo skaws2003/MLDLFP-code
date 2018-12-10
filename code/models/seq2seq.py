@@ -17,10 +17,12 @@ class EncoderRNN(nn.Module):
         self.embedding = embedding
         self.num_split = num_split
 
+
         # Initialize GRU; the input_size and hidden_size params are both set to 'hidden_size'
         #   because our input size is a word embedding with number of features == hidden_size
         if num_split != -1:
             self.model = net(input_size, hidden_size, n_layers, num_split=num_split, device=device).to(device)
+
         else:
             self.model = net(input_size, hidden_size, n_layers, device=device).to(device)
 
@@ -159,14 +161,15 @@ def zeroPadding(l, fillvalue=0):
 
 if __name__ == "__main__":
     from rnn import RNN
-    from ernn import EfficientRNN
+    from ernn import NTRNN
+    from darnn import DARNN
     embedding = nn.Embedding(10, 3, padding_idx=0)
     hidden_size = 4
     output_size = 2
     input_size = 3
     inputs = torch.LongTensor(zeroPadding([[1,2,3], [1, 2, 3, 5, 7]])).transpose(0, 1)
 
-    encoder = EncoderRNN(input_size, hidden_size, embedding, EfficientRNN, n_layers=3, num_split=-1, dropout=0)
+    encoder = EncoderRNN(input_size, hidden_size, embedding, DARNN, n_layers=3, num_split=-1, dropout=0)
     #attn_model = Attn('general', hidden_size)
     #decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, output_size, EfficientRNN, n_layers=1, num_split=3, dropout=0.1)
     decoder = linear_decoder('general', embedding, hidden_size, output_size, n_layers=1, num_split=3, dropout=0.1)

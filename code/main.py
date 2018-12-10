@@ -20,14 +20,14 @@ from utils import Lang
 from models.seq2seq import *
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
-parser.add_argument('--lr', default=0.1, type=float, help='Initial learning rate')
+parser.add_argument('--lr', default=0.01, type=float, help='Initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
 parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
-parser.add_argument('--arch', default='ernn', help='Network architecture')
+#parser.add_argument('--arch', default='ernn', help='Network architecture')
 parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
 parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
@@ -52,10 +52,12 @@ num_split = args.num_split
 hidden_size = args.hidden_size
 output_size = 2
 batch_size = args.batch_size
-if args.arch=='ernn':
-    net=ernn.EfficientRNN
-else:
-    net=rnn.RNN
+#if args.arch=='ernn':
+#net=ernn.NTRNN
+#elif args.arch=='darnn':
+net=darnn.DARNN
+#else:
+#    net=rnn.RNN
 
 
 # Set batch size to 1 for embedding

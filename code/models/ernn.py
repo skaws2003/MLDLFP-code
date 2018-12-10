@@ -8,9 +8,9 @@ import numpy as np
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
-class EfficientRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3, penalty=0.5, device = 'cpu', batch_first = True):
-        super(EfficientRNN, self).__init__()
+class NTRNN(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3, device = 'cpu', batch_first = True):
+        super(NTRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
@@ -18,7 +18,7 @@ class EfficientRNN(nn.Module):
         self.num_split = num_split
         self.rnns = []    #dim 0 is split, dim 1 is layer
         self.device = device
-        self.layer_weights = torch.nn.Linear(self.hidden_size, self.hidden_size)
+        self.layer_weights = torch.nn.Linear(self.hidden_size, self.hidden_size).to(self.device)
         self.batch_first = batch_first
 
         for i in range(num_split):
