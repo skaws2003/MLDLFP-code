@@ -13,6 +13,7 @@ import torchvision.transforms as transforms
 import os
 import argparse
 import time
+import copy
 
 from models import *
 from dataloader import *
@@ -232,7 +233,7 @@ if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
     for epoch in range(start_epoch, start_epoch+args.epoch):
-        state_bfore = encoder.model.state_dict()
+        state_bfore = copy.deepcopy(encoder.model.state_dict())
         epoch_time = time.time()
         dataloaders['train'].shuffle()
         train(epoch)
