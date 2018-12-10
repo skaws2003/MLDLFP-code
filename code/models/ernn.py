@@ -31,7 +31,7 @@ class EfficientRNN(nn.Module):
         self.selective_layer = nn.Linear(self.hidden_size + self.input_size, num_split)
         #self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
-    def forward(self, x, hidden=None, penalty=0.9):
+    def forward(self, x, hidden=None, penalty=0.7):
         # Set initial states
         is_packed = isinstance(x, PackedSequence) #check use packed sequence
         if is_packed:
@@ -106,15 +106,15 @@ class EfficientRNN(nn.Module):
 
 
 def test():
-    batch_size = 4
-    input_size = 10
-    hidden_size = 20
-    seq_length = 5
+    batch_size = 2
+    input_size = 5
+    hidden_size = 4
+    seq_length = 30
     num_layers = 2
-    num_classes = 5
+    num_classes = 2
     num_split = 3
     net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device).to(device)
-    x = torch.randn(batch_size, seq_length, input_size).to(device) # (batch, seq_length, input_size)
+    x = torch.ones(batch_size, seq_length, input_size).to(device) # (batch, seq_length, input_size)
     y, h = net(x)
     print(y.size())
 
