@@ -50,7 +50,7 @@ class EfficientRNN(nn.Module):
             h0 = hidden
 
 
-        penalty_layer = torch.ones(self.num_split).to(self.device) #add penalty layer
+        penalty_layer = torch.ones(max_batch_size, self.num_split).to(self.device) #add penalty layer
         cur_cell = 0
 
 
@@ -62,7 +62,7 @@ class EfficientRNN(nn.Module):
         last_hidden = h
 
         #add penalty layer
-        penalty_layer[cur_cell] = penalty*penalty_layer[cur_cell]
+        penalty_layer[:,cur_cell] = penalty*penalty_layer[:,cur_cell]
         penalty_layer = penalty_layer/penalty_layer.max()
 
         outputs = h_c
@@ -83,7 +83,7 @@ class EfficientRNN(nn.Module):
             sum_hidden = self.selective_layer(torch.cat((sum_hidden.squeeze(1), input[:,i,:]), dim=1)) #select which cell to use on next
 
 
-            sum_hidden = F.softmax(sum_hidden, dim=1)
+            sum_hidden = F.softmax(sum_hidden, dim=1)*penalty_layer
             _, sum_hidden = sum_hidden.max(1)
             cur_cell = sum_hidden.bincount() #we use maximum mean of batch value of linear layer
             _, cur_cell = cur_cell.max(0)
@@ -96,7 +96,7 @@ class EfficientRNN(nn.Module):
                 h = torch.cat((h, h_c), dim=1)
             last_hidden = h
 
-            penalty_layer[cur_cell] = penalty * penalty_layer[cur_cell]
+            penalty_layer[:, cur_cell] = penalty * penalty_layer[:, cur_cell]
             penalty_layer = penalty_layer / penalty_layer.max()
 
             outputs = torch.cat((outputs, h_c), dim=1)
@@ -107,13 +107,13 @@ class EfficientRNN(nn.Module):
 
 
 def test():
-    batch_size = 10
+    batch_size = 3
     input_size = 5
     hidden_size = 4
     seq_length = 3
     num_layers = 2
     num_classes = 2
-    num_split = 8
+    num_split = 3
     net = EfficientRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device).to(device)
     x = torch.rand(batch_size, seq_length, input_size).to(device) # (batch, seq_length, input_size)
     y, h = net(x)
