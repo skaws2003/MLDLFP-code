@@ -18,7 +18,7 @@ import copy
 from models import *
 from dataloader import *
 from utils import Lang
-from models.seq2seq import *
+from models.seq2seq2 import *
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
 parser.add_argument('--lr', default=0.01, type=float, help='Initial learning rate')
