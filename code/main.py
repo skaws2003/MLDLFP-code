@@ -26,9 +26,9 @@ parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
-parser.add_argument('--hidden_size', default=512, help='Hidden Layer size')
+parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
 parser.add_argument('--arch', default='ernn', help='Network architecture')
-parser.add_argument('--num_split', default=3, help='Number of split RNN')
+parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
 
 args = parser.parse_args()
 
