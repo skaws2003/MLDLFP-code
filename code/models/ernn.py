@@ -28,7 +28,7 @@ class EfficientRNN(nn.Module):
                 l.append(nn.GRUCell(self.hidden_size, self.hidden_size).to(self.device)) #other layer
             self.rnns.append(l)
 
-        self.selective_layer = nn.Linear(self.hidden_size + self.hidden_size, num_split)
+        self.selective_layer = nn.Linear(self.hidden_size + self.input_size, num_split)
         #self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
     def forward(self, x, hidden=None, penalty=0.9):
@@ -54,10 +54,10 @@ class EfficientRNN(nn.Module):
         cur_cell = 0
 
 
-        h_c = self.rnns[cur_cell][0](input[:, 0, :], h0[:, 0, :]).view(max_batch_size, 1, self.hidden_size) #first layer prop
+        h_c = self.rnns[cur_cell][0](input[:, 0, :], h0[:, 0, :]).unsqueeze(1) #first layer prop
         h = h_c
         for i in range(1, self.num_layers):
-            h_c = self.rnns[cur_cell][i](h[:, i, :], h0[:, i, :]).view(max_batch_size, 1, self.hidden_size)
+            h_c = self.rnns[cur_cell][i](h_c.squeeze(1), h0[:, i, :]).unsqueeze(1)
             h = torch.cat((h, h_c), dim=1)
         last_hidden = h
 
@@ -88,10 +88,10 @@ class EfficientRNN(nn.Module):
             _, cur_cell = sum_hidden.max(0) #we use maximum mean of batch value of linear layer
             cur_cell = cur_cell.item()
 
-            h_c = self.rnns[cur_cell][0](input[:, 0, :], last_hidden[:, 0, :]).view(max_batch_size, 1, self.hidden_size)  # continue prop
+            h_c = self.rnns[cur_cell][0](input[:, i, :], last_hidden[:, 0, :]).unsqueeze(1)  # continue prop
             h = h_c
-            for i in range(1, self.num_layers):
-                h_c = self.rnns[cur_cell][i](h[:, i, :], last_hidden[:, i, :]).view(max_batch_size, 1, self.hidden_size)
+            for j in range(1, self.num_layers):
+                h_c = self.rnns[cur_cell][j](h_c.squeeze(1), last_hidden[:, j, :]).unsqueeze(1)
                 h = torch.cat((h, h_c), dim=1)
             last_hidden = h
 
