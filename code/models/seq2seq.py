@@ -1,6 +1,4 @@
 from . import *
-from rnn import RNN
-from ernn import EfficientRNN
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -157,6 +155,8 @@ def zeroPadding(l, fillvalue=0):
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
 
 if __name__ == "__main__":
+    from rnn import RNN
+    from ernn import EfficientRNN
     embedding = nn.Embedding(10, 3, padding_idx=0)
     hidden_size = 4
     output_size = 2
