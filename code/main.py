@@ -154,7 +154,8 @@ def train(epoch):
         grad = {}
         for key in state_bfore.keys():
             grad[key] = state_after[key] - state_bfore[key]
-        print(grad)
+        if epoch==20:
+            print(grad)
 
     encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
     decoder_scheduler.step(metrics=train_loss)
