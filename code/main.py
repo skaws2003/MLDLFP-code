@@ -157,8 +157,8 @@ def train(epoch):
         if epoch==20:
             print(grad)
 
-    encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
-    decoder_scheduler.step(metrics=train_loss)
+    #encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
+    #decoder_scheduler.step(metrics=train_loss)
 
 def test(epoch):
     global best_acc
