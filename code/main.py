@@ -26,25 +26,30 @@ parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
+parser.add_argument('--hidden_size', default=512, help='Hidden Layer size')
+parser.add_argument('--arch', default='ernn', help='Network architecture')
+parser.add_argument('--num_split', default=3, help='Number of split RNN')
 
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 best_acc = 0  # best test accuracy
 start_epoch = 0  # start from epoch 0 or last checkpoint epoch
-batch_size = 1 # should be 1
 
 # Model
 print('==> Building model..')
 
 input_size = 128  #same as embedding size
 num_layers = 2      ###
-num_split = 5
-hidden_size = 128
+num_split = args.num_split
+hidden_size = args.hidden_size
 output_size = 2
 batch_size = args.batch_size
-net =  ernn.EfficientRNN
-#net =  rnn.RNN
+if args.arch=='ernn':
+    net =  ernn.EfficientRNN
+if args.arch=='rnn':
+    net=rnn.RNN
+
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)
