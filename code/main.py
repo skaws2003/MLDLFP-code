@@ -152,9 +152,7 @@ def train(epoch):
         grad = {}
         for key in state_bfore.keys():
             grad[key] = state_after[key] - state_bfore[key]
-        fil = open("grad.txt",'w')
-        fil.write(grad)
-        fil.close()
+        print(grad)
 
     encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
     decoder_scheduler.step(metrics=train_loss)
