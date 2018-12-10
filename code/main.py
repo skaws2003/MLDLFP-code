@@ -37,13 +37,13 @@ batch_size = 1 # should be 1
 print('==> Building model..')
 
 input_size = 128  #same as embedding size
-num_layers = 1      ###
+num_layers = 2      ###
 num_split = -1
 hidden_size = 512
 output_size = 2
 batch_size = args.batch_size
-#net =  ernn.EfficientRNN
-net =  rnn.RNN
+net =  ernn.EfficientRNN
+#net =  rnn.RNN
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)

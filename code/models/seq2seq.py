@@ -38,7 +38,7 @@ class EncoderRNN(nn.Module):
         ##we don't use bidirectional here
         #outputs = outputs[:, :, :self.hidden_size] + outputs[:, : ,self.hidden_size:]
         # Return output and final hidden state
-        return outputs, hidden
+        return outputs, hidden.unsqueeze(1)
 
 # Luong attention layer
 class Attn(torch.nn.Module):
@@ -59,6 +59,7 @@ class Attn(torch.nn.Module):
 
     def general_score(self, hidden, encoder_output):
         energy = self.attn(encoder_output)
+        print(hidden.size(), energy.size())
         return torch.sum(hidden * energy, dim=2)
 
     def concat_score(self, hidden, encoder_output):
@@ -173,6 +174,6 @@ if __name__ == "__main__":
 
     outputs, last_hidden = encoder(inputs, torch.LongTensor([len(seq) for seq in inputs]))
     outputs = outputs.transpose(0, 1)
-    output, hidden = decoder(last_hidden.unsqueeze(1), outputs)
+    output, hidden = decoder(last_hidden, outputs)
     print(output)
 
