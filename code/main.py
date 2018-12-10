@@ -121,7 +121,7 @@ def train(epoch):
     correct = 0
     total = 0
     for batch_idx, (text, semantic) in enumerate(dataloaders['train']):
-        state_bfore = encoder.state_dict()
+        
         inputs, targets = text, semantic.to(device)
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
@@ -150,12 +150,7 @@ def train(epoch):
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
 
-        state_after = encoder.state_dict()
-        grad = {}
-        for key in state_bfore.keys():
-            grad[key] = state_after[key] - state_bfore[key]
-        if epoch==20:
-            print(grad)
+        
 
     #encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
     #decoder_scheduler.step(metrics=train_loss)
@@ -237,10 +232,17 @@ if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
     for epoch in range(start_epoch, start_epoch+args.epoch):
+        state_bfore = encoder.model.state_dict()
         epoch_time = time.time()
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
+        state_after = encoder.model.state_dict()
+        grad = {}
+        for key in state_bfore.keys():
+            grad[key] = state_after[key] - state_bfore[key]
+        if epoch==20:
+            print(grad)
         """
         if epoch%2 == 0 and epoch != 0:
             if dataloaders['train'].get_batch_size() > 1:
