@@ -61,6 +61,9 @@ batch_size = args.batch_size
 #else:
 net=rnn.RNN
 
+#l Log files
+logfileAcc = open("log_gru_acc.txt",'w')
+logfileLoss = open("log_gru_loss.txt",'w')
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)
@@ -190,8 +193,10 @@ def test(epoch):
     # Save checkpoint.
     acc = 100.*correct/total
     print(acc)
-    with open('log.txt', 'a', encoding='utf8') as logfile:
-        logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc) + '\n')
+    
+    # Write logs
+    logfileAcc.write(str(epoch) + '\t' + str(acc) + '\n')
+    logfileLoss.write(str(epoch) + '\t' + str(test_loss) + '\n')
     '''
     if acc > best_acc:
         print('Saving..  %f' % acc)
@@ -233,7 +238,6 @@ def predict():
 if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
-    torch.save(encoder.state_dict(),"rnndict-%d.pt"%args.hidden_size)
     for epoch in range(start_epoch, start_epoch+args.epoch):
         state_bfore = copy.deepcopy(encoder.model.state_dict())
         epoch_time = time.time()
@@ -255,3 +259,5 @@ if __name__ == '__main__':
         print("time took for epoch: %f"%(time.time()-epoch_time))
 
     print("time took for all: %f"%(time.time()-all_time))
+    logfileAcc.close()
+    logfileLoss.close()

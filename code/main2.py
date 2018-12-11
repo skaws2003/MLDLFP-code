@@ -19,7 +19,6 @@ from models import *
 from dataloader import *
 from utils import Lang
 from models.seq2seq2 import *
-from STLoss import *
 import pickle
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
@@ -29,10 +28,9 @@ parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
-parser.add_argument('--input_size', default=256, type=int, help='Embedding size')
-parser.add_argument('--hidden_size', default=256, type=int, help='Hidden Layer size')
+parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
 #parser.add_argument('--arch', default='ernn', help='Network architecture')
-parser.add_argument('--num_split', default=4, type=int, help='Number of split RNN')
+parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
 parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
 args = parser.parse_args()
@@ -50,7 +48,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = args.input_size  #same as embedding size
+input_size = 128  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
@@ -59,6 +57,9 @@ batch_size = args.batch_size
 
 net=darnn.DARNN
 
+# Log files
+logfileAcc = open("log_da_acc.txt",'w')
+logfileLoss = open("log_da_loss.txt",'w')
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)
@@ -104,12 +105,12 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-criterion = STLoss(1, 1)
+criterion = nn.NLLLoss()
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
-encoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=encoder_optimizer, factor=0.5, patience=10)
-decoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=decoder_optimizer,factor=0.5,patience=10)
+#encoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=encoder_optimizer, factor=0.5, patience=10)
+#decoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=decoder_optimizer,factor=0.5,patience=10)
 
 
 # Training
@@ -135,13 +136,8 @@ def train(epoch):
         output, hidden = decoder(hidden, outputs)
 
 
-        loss = criterion(domain_weight, output, targets)
+        loss = criterion(output, targets)
         loss.backward()
-
-        torch.nn.utils.clip_grad_norm_(encoder.parameters(), 0.25)
-        for p in encoder.parameters():
-            p.data.add_(-0.01, p.grad.data)
-
 
         encoder_optimizer.step()
         decoder_optimizer.step()
@@ -157,8 +153,8 @@ def train(epoch):
 
         
 
-    encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
-    decoder_scheduler.step(metrics=train_loss)
+    #encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
+    #decoder_scheduler.step(metrics=train_loss)
 
 def test(epoch):
     global best_acc
@@ -180,7 +176,7 @@ def test(epoch):
             outputs = outputs.transpose(0, 1)
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(domain_weight, output, targets)
+            loss = criterion(output, targets)
 
             test_loss += loss.item()
             _, predicted = output.max(1)
@@ -194,8 +190,9 @@ def test(epoch):
     # Save checkpoint.
     acc = 100.*correct/total
     print(acc)
-    with open('log.txt', 'a', encoding='utf8') as logfile:
-        logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc) + '\n')
+    # Write logs
+    logfileAcc.write(str(epoch) + '\t' + str(acc) + '\n')
+    logfileLoss.write(str(epoch) + '\t' + str(test_loss) + '\n')
 
     if acc > best_acc:
         print('Saving..  %f' % acc)
@@ -238,18 +235,17 @@ def predict():
 if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
-    torch.save(encoder.state_dict(),"darnndict-%d.pt"%args.hidden_size)
     for epoch in range(start_epoch, start_epoch+args.epoch):
-        #state_bfore = copy.deepcopy(encoder.state_dict())
+        state_bfore = copy.deepcopy(encoder.model.state_dict())
         epoch_time = time.time()
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
-        #state_after = encoder.state_dict()
+        state_after = encoder.model.state_dict()
         grad = {}
-        #for key in state_bfore.keys():
-        #    grad[key] = state_after[key] - state_bfore[key]
-        #if epoch==2:
+        for key in state_bfore.keys():
+            grad[key] = state_after[key] - state_bfore[key]
+        #if epoch==20:
         #    print(grad)
         """
         if epoch%2 == 0 and epoch != 0:
@@ -259,3 +255,5 @@ if __name__ == '__main__':
         """
         print("time took for epoch: %f"%(time.time()-epoch_time))
     print("time took for all: %f"%(time.time()-all_time))
+    logfileAcc.close()
+    logfileLoss.close()
