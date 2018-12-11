@@ -26,6 +26,7 @@ parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
 parser.add_argument('--lr', default=0.01, type=float, help='Initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--predict', action='store_true', help='forward prop')
+parser.add_argument('--input_size', default=256, type=int, help='Embedding size')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
@@ -51,7 +52,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = 256  #same as embedding size
+input_size = args.input_size  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
