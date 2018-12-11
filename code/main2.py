@@ -29,6 +29,7 @@ parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
+parser.add_argument('--input_size', default=256, type=int, help='Embedding size')
 parser.add_argument('--hidden_size', default=256, type=int, help='Hidden Layer size')
 #parser.add_argument('--arch', default='ernn', help='Network architecture')
 parser.add_argument('--num_split', default=4, type=int, help='Number of split RNN')
@@ -49,7 +50,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = 128  #same as embedding size
+input_size = args.input_size  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
