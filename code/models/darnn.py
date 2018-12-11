@@ -54,7 +54,6 @@ class DARNN(nn.Module):
         weight = F.softmax(weight, dim=2)
         out_total, h_total = self.split_grus[0](input, h0)
 
-        print(weight.size(), weight)
 
         mat = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
         w = weight[:,:,0].unsqueeze(2).bmm(mat)
