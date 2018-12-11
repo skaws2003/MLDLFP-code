@@ -134,7 +134,7 @@ def train(epoch):
         output, hidden = decoder(hidden, outputs)
 
 
-        loss = criterion(output, targets)
+        loss = criterion(domain_weight, output, targets)
         loss.backward()
 
         torch.nn.utils.clip_grad_norm_(encoder.parameters(), 0.25)
@@ -179,7 +179,7 @@ def test(epoch):
             outputs = outputs.transpose(0, 1)
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(output, targets)
+            loss = criterion(domain_weight, output, targets)
 
             test_loss += loss.item()
             _, predicted = output.max(1)
