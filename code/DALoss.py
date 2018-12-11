@@ -1,8 +1,8 @@
 import torch
 
-class STLoss(torch.nn.Module):
+class DALoss(torch.nn.Module):
     def __init__(self, hyper1, hyper2):
-        super(STLoss,self).__init__()
+        super(DALoss,self).__init__()
         self.nllloss = torch.nn.NLLLoss()
         self.hyper1 = hyper1
         self.hyper2 = hyper2
