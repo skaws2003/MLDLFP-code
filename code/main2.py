@@ -19,6 +19,7 @@ from models import *
 from dataloader import *
 from utils import Lang
 from models.seq2seq2 import *
+from DALoss import DALoss
 import pickle
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
@@ -105,7 +106,7 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-criterion = nn.STLoss(1, 1)
+criterion = nn.DALoss(1, 1)
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
