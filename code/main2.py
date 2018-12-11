@@ -28,9 +28,9 @@ parser.add_argument('--predict', action='store_true', help='forward prop')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
-parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
+parser.add_argument('--hidden_size', default=256, type=int, help='Hidden Layer size')
 #parser.add_argument('--arch', default='ernn', help='Network architecture')
-parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
+parser.add_argument('--num_split', default=4, type=int, help='Number of split RNN')
 parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
 args = parser.parse_args()
@@ -136,6 +136,11 @@ def train(epoch):
         loss = criterion(output, targets)
         loss.backward()
 
+        torch.nn.utils.clip_grad_norm_(encoder.parameters(), 0.25)
+        for p in encoder.parameters():
+            p.data.add_(-0.01, p.grad.data)
+
+
         encoder_optimizer.step()
         decoder_optimizer.step()
 
@@ -232,16 +237,16 @@ if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
     for epoch in range(start_epoch, start_epoch+args.epoch):
-        state_bfore = copy.deepcopy(encoder.model.state_dict())
+        #state_bfore = copy.deepcopy(encoder.state_dict())
         epoch_time = time.time()
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
-        state_after = encoder.model.state_dict()
+        #state_after = encoder.state_dict()
         grad = {}
-        for key in state_bfore.keys():
-            grad[key] = state_after[key] - state_bfore[key]
-        #if epoch==20:
+        #for key in state_bfore.keys():
+        #    grad[key] = state_after[key] - state_bfore[key]
+        #if epoch==2:
         #    print(grad)
         """
         if epoch%2 == 0 and epoch != 0:

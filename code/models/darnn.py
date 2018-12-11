@@ -19,10 +19,12 @@ class DARNN(nn.Module):
 
         self.weight_gru = nn.GRU(self.input_size, self.hidden_size//2, self.num_layers, batch_first=True, bidirectional=False).to(self.device) #gru that gives weight
         self.split_grus = [] #list of splited gru's
-        self.weight_layer = nn.Linear(self.hidden_size//2, self.num_split).to(self.device)
+        self.weight_layer = nn.Linear(self.hidden_size//2, 4).to(self.device)
 
-        for i in range(self.num_split):
-            self.split_grus.append(nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)) #first layer
+        self.gru1 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device) #first layer
+        self.gru2 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)
+        self.gru3 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)
+        self.gru4 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)
 
 
         #self.fc = nn.Linear(self.hidden_size, num_classes)
@@ -52,20 +54,30 @@ class DARNN(nn.Module):
 
         weight = self.weight_layer(weight_out)
         weight = F.softmax(weight, dim=2)
-        out_total, h_total = self.split_grus[0](input, h0)
-
-
-        mat = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
-        w = weight[:,:,0].unsqueeze(2).bmm(mat)
+        out_total, h_total = self.gru1(input, h0)
+        mat1 = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
+        w = weight[:,:,0].unsqueeze(2).bmm(mat1)
         out_total = (out_total*w).unsqueeze(3)
 
 
-        for i in range(1, len(self.split_grus)):
-            mat = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
-            w = weight[:,:,i].unsqueeze(2).bmm(mat)
-            out, h = self.split_grus[i](input, h0)
-            out = (out*w).unsqueeze(3)
-            out_total = torch.cat((out_total, out), dim=3)
+
+        mat2 = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
+        w = weight[:,:,1].unsqueeze(2).bmm(mat2)
+        out, h = self.gru2(input, h0)
+        out = (out*w).unsqueeze(3)
+        out_total = torch.cat((out_total, out), dim=3)
+
+        mat3 = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
+        w = weight[:,:,2].unsqueeze(2).bmm(mat3)
+        out, h = self.gru3(input, h0)
+        out = (out*w).unsqueeze(3)
+        out_total = torch.cat((out_total, out), dim=3)
+
+        mat4 = torch.ones(max_batch_size, 1, self.hidden_size).to(self.device)
+        w = weight[:,:,3].unsqueeze(2).bmm(mat4)
+        out, h = self.gru4(input, h0)
+        out = (out*w).unsqueeze(3)
+        out_total = torch.cat((out_total, out), dim=3)
 
         out_total = torch.sum(out_total, 3)
 
