@@ -106,7 +106,7 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-criterion = DALoss(1, 1)
+criterion = DALoss(1, 10)
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
