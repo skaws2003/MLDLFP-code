@@ -51,7 +51,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = 128  #same as embedding size
+input_size = 256  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
