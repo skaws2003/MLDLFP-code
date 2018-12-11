@@ -245,11 +245,6 @@ if __name__ == '__main__':
         train(epoch)
         test(epoch)
         state_after = encoder.model.state_dict()
-        grad = {}
-        for key in state_bfore.keys():
-            grad[key] = state_after[key] - state_bfore[key]
-        if epoch==20:
-            print(grad)
         """
         if epoch%2 == 0 and epoch != 0:
             if dataloaders['train'].get_batch_size() > 1:
