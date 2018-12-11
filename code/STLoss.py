@@ -8,6 +8,7 @@ class STLoss(torch.nn.Module):
         self.hyper2 = hyper2
     
     def forward(self,domain_weight,output,target):
+        #print(domain_weight, domain_weight.size())
         #domain_weight.shape = [batch_size,seq_len,num_split]
         nll = self.nllloss(output,target)
 
