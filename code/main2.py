@@ -58,8 +58,8 @@ batch_size = args.batch_size
 net=darnn.DARNN
 
 # Log files
-logfileAcc = open("log_da_acc.txt",'w')
-logfileLoss = open("log_da_loss.txt",'w')
+logfileAcc = open("log_da_acc%d.txt"%args.hidden_size,'w')
+logfileLoss = open("log_da_loss%d.txt"%args.hidden_size,'w')
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)
