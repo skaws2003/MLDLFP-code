@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import PackedSequence
-
+from torch.nn import init
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -21,11 +21,29 @@ class DARNN(nn.Module):
         self.split_grus = [] #list of splited gru's
         self.weight_layer = nn.Linear(self.hidden_size//2, 4).to(self.device)
 
+
+
         self.gru1 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device) #first layer
         self.gru2 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)
         self.gru3 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)
         self.gru4 = nn.GRU(self.input_size, self.hidden_size, self.num_layers, batch_first=True, bidirectional=False).to(self.device)
 
+        for layer_p in self.gru1._all_weights:
+            for p in layer_p:
+                if 'weight' in p:
+                    init.normal(self.gru1.__getattr__(p), 0.0, 0.02)
+        for layer_p in self.gru2._all_weights:
+            for p in layer_p:
+                if 'weight' in p:
+                    init.normal(self.gru2.__getattr__(p), 0.0, 0.02)
+        for layer_p in self.gru3._all_weights:
+            for p in layer_p:
+                if 'weight' in p:
+                    init.normal(self.gru3.__getattr__(p), 0.0, 0.02)
+        for layer_p in self.gru4._all_weights:
+            for p in layer_p:
+                if 'weight' in p:
+                    init.normal(self.gru4.__getattr__(p), 0.0, 0.02)
 
         #self.fc = nn.Linear(self.hidden_size, num_classes)
 
