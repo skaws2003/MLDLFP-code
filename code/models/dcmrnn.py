@@ -7,9 +7,9 @@ from torch.nn import init
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-class DARNN(nn.Module):
+class DCMRNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_split=3, device = 'cpu', batch_first = True):
-        super(DARNN, self).__init__()
+        super(DCMRNN, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.input_size = input_size
@@ -107,7 +107,7 @@ def test():
     seq_length = 5
     num_layers = 2
     num_classes = 5
-    net = DARNN(input_size, hidden_size, num_layers, device=device).to(device)
+    net = DCMRNN(input_size, hidden_size, num_layers, device=device).to(device)
     x = torch.randn(3, 5, 10).to(device) # (batch, seq_length, input_size)
     y = net(x)
     print(y[0].size())

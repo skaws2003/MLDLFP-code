@@ -19,21 +19,22 @@ from models import *
 from dataloader import *
 from utils import Lang
 from models.seq2seq2 import *
-from DALoss import DALoss
+from DCMLoss import DCMLoss
 import pickle
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
 parser.add_argument('--lr', default=0.01, type=float, help='Initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
 parser.add_argument('--predict', action='store_true', help='forward prop')
+parser.add_argument('--input_size', default=256, type=int, help='Embedding size')
 parser.add_argument('--batch_size', default=200, type=int, help='define batch size')
 parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
 parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
 #parser.add_argument('--arch', default='ernn', help='Network architecture')
 parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
-parser.add_argument('--hyper1', default=2, type=int, help='DAloss parameter 1')
-parser.add_argument('--hyper2', default=3, type=int, help='DAloss parameter 2')
+parser.add_argument('--hyper1', default=0.8, type=float, help='DAloss parameter 1')
+parser.add_argument('--hyper2', default=0.9, type=float, help='DAloss parameter 2')
 parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
 args = parser.parse_args()
@@ -51,7 +52,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Model
 print('==> Building model..')
 
-input_size = 128  #same as embedding size
+input_size = args.input_size  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
@@ -60,11 +61,11 @@ hyper2 = args.hyper2
 output_size = 2
 batch_size = args.batch_size
 
-net=darnn.DARNN
+net= dcmrnn.DCMRNN
 
 # Log files
-logfileAcc = open("log_da_acc%d.txt"%args.hidden_size,'w')
-logfileLoss = open("log_da_loss%d.txt"%args.hidden_size,'w')
+logfileAcc = open("log_dcm_acc%d.txt"%args.hidden_size,'w')
+logfileLoss = open("log_dcm_loss%d.txt"%args.hidden_size,'w')
 
 
 
@@ -112,8 +113,8 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-print(hyper1, hyper2)
-criterion = DALoss(hyper1, hyper2)
+print('hyper 1:',hyper1,'hyper 2:', hyper2)
+criterion = DCMLoss(hyper1, hyper2)
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 

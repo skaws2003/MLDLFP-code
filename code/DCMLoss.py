@@ -1,14 +1,14 @@
 import torch
 
-# custom loss function to solve
-class DALoss(torch.nn.Module):
+class DCMLoss(torch.nn.Module):
     def __init__(self, hyper1, hyper2):
-        super(DALoss,self).__init__()
+        super(DCMLoss,self).__init__()
         self.nllloss = torch.nn.NLLLoss()
         self.hyper1 = hyper1
         self.hyper2 = hyper2
     
     def forward(self,domain_weight,output,target):
+        #domain_weight.shape = [batch_size,seq_len,num_split]
         nll = self.nllloss(output,target)
 
         dot_sum = torch.sum(domain_weight*domain_weight, dim=2)
