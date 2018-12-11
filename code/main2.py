@@ -194,6 +194,7 @@ def test(epoch):
         print('Saving..  %f' % acc)
         with open('Rpweights.pickle', 'wb') as handle:
             pickle.dump(domain_weight, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        best_acc = acc
 
     '''
         state = {
@@ -205,7 +206,6 @@ def test(epoch):
         #if not os.path.isdir('checkpoint'):
             #os.mkdir('checkpoint')
         torch.save(state, 'checkpoint/ERNN.t7')
-        best_acc = acc
     '''
 # not use yet
 '''
