@@ -18,7 +18,7 @@ from models import *
 import out_dataset as ds
 import csv
 
-
+# trainer class for training
 class Trainer():
 
     def __init__(self, learning_rate, checkpoint_loc, csv_loc, batch_size):

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# movie-review polarity dataset for experiment
 import torch
 import torchvision
 import re               # Regular Expressions
@@ -53,6 +54,7 @@ def normalizeString(sentence):
     s = re.sub(r"[^a-zA-Z!?]+", r" ", s)
     return s
 
+# movie-review polarity dataset
 class Polarity_dataset(torch.utils.data.Dataset):
     def __init__(self,pos_path,neg_path,one_hot=True):
         """
@@ -115,6 +117,7 @@ class Polarity_dataset(torch.utils.data.Dataset):
             else:
                 self.labels.append(data[1])
 
+# movie review polarity dataloader
 class Polarity_dataloader():
     def __init__(self,dataset,batch_size=1):
         """
