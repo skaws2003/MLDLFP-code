@@ -19,6 +19,7 @@ from models import *
 from dataloader import *
 from utils import Lang
 from models.seq2seq2 import *
+import pickle
 
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
 parser.add_argument('--lr', default=0.01, type=float, help='Initial learning rate')
@@ -48,17 +49,13 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 print('==> Building model..')
 
 input_size = 128  #same as embedding size
-num_layers = 1      ###
+num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
 output_size = 2
 batch_size = args.batch_size
-#if args.arch=='ernn':
-net=ernn.NTRNN
-#elif args.arch=='darnn':
-#net=darnn.DARNN
-#else:
-#net=rnn.RNN
+
+net=darnn.DARNN
 
 
 # Set batch size to 1 for embedding
@@ -146,7 +143,7 @@ def train(epoch):
         _, predicted = output.max(1)
         total += targets.size(0)
         correct += predicted.eq(targets).sum().item()
-        
+
         if batch_idx%(len(dataloaders['train'])// 2) == 0 and args.silent: #print every 50%
             print(batch_idx, len(dataloaders['train']), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
@@ -163,6 +160,7 @@ def test(epoch):
     test_loss = 0
     correct = 0
     total = 0
+    domain_weight = None
     with torch.no_grad():
         for batch_idx, (text, semantic) in enumerate(dataloaders['test']):
             inputs, targets = text, semantic.to(device)
@@ -191,9 +189,13 @@ def test(epoch):
     print(acc)
     with open('log.txt', 'a', encoding='utf8') as logfile:
         logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc) + '\n')
-    '''
+
     if acc > best_acc:
         print('Saving..  %f' % acc)
+        with open('Rpweights.pickle', 'wb') as handle:
+            pickle.dump(domain_weight, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    '''
         state = {
             'encoder': encoder.state_dict(),
             'decoder': decoder.state_dict(),
@@ -205,9 +207,6 @@ def test(epoch):
         torch.save(state, 'checkpoint/ERNN.t7')
         best_acc = acc
     '''
-
-
-
 # not use yet
 '''
 def predict():

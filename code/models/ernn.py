@@ -43,7 +43,7 @@ class NTRNN(nn.Module):
             max_batch_size = x.size(0) if self.batch_first else x.size(1)
             input = x
 
-        if hidden is None:
+        if 1:#hidden is None:
             h0 = torch.zeros(max_batch_size, self.num_layers, self.hidden_size).to(self.device) #input hidden
             #c0 = torch.zeros(x.size(0), self.hidden_size).to(device)
         else:
@@ -74,6 +74,7 @@ class NTRNN(nn.Module):
             #finding which cell to use
 
             sum_hidden = self.layer_weights(h)
+
             if self.num_layers > 1:
                 energy = self.layer_weights(h)
                 layer_energies = torch.sum(energy, dim=2)
@@ -118,6 +119,22 @@ def test():
     x = torch.rand(batch_size, seq_length, input_size).to(device) # (batch, seq_length, input_size)
     y, h = net(x)
     print(y.size())
+
+def grad_test():
+    from torch.autograd import gradcheck
+    batch_size = 3
+    input_size = 5
+    hidden_size = 4
+    seq_length = 3
+    num_layers = 2
+    num_classes = 2
+    num_split = 3
+    net = NTRNN(input_size, hidden_size, num_layers, num_classes, num_split, device=device).to(device)
+
+    x = (torch.rand(batch_size, seq_length, input_size, requires_grad=True).to(device),
+         torch.rand(batch_size, seq_length, input_size, requires_grad=True).to(device))# (batch, seq_length, input_size)
+    test = gradcheck(net, x, eps=1e-6, atol=1e-4)
+    print(test)
 
 if __name__=="__main__":
     test()
