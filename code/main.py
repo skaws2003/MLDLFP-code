@@ -233,6 +233,7 @@ def predict():
 if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
+    torch.save(encoder.state_dict(),"rnndict-%d.pt"%args.hidden_size)
     for epoch in range(start_epoch, start_epoch+args.epoch):
         state_bfore = copy.deepcopy(encoder.model.state_dict())
         epoch_time = time.time()
@@ -252,4 +253,5 @@ if __name__ == '__main__':
                 print("batch decay. Now size: %d"%dataloaders['train'].get_batch_size())
         """
         print("time took for epoch: %f"%(time.time()-epoch_time))
+
     print("time took for all: %f"%(time.time()-all_time))

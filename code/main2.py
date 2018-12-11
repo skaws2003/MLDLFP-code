@@ -238,6 +238,7 @@ def predict():
 if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
+    torch.save(encoder.state_dict(),"darnndict-%d.pt"%args.hidden_size)
     for epoch in range(start_epoch, start_epoch+args.epoch):
         #state_bfore = copy.deepcopy(encoder.state_dict())
         epoch_time = time.time()
