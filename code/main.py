@@ -61,9 +61,6 @@ batch_size = args.batch_size
 #else:
 net=rnn.RNN
 
-#l Log files
-logfileAcc = open("log_gru_acc-%d.txt"%args.hidden_size,'w')
-logfileLoss = open("log_gru_loss%d.txt"%args.hidden_size,'w')
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)
@@ -193,10 +190,8 @@ def test(epoch):
     # Save checkpoint.
     acc = 100.*correct/total
     print(acc)
-    
-    # Write logs
-    logfileAcc.write(str(epoch) + '\t' + str(acc) + '\n')
-    logfileLoss.write(str(epoch) + '\t' + str(test_loss) + '\n')
+    with open('log.txt', 'a', encoding='utf8') as logfile:
+        logfile.write("epoch :" + str(epoch) + ', accuracy :' + str(acc) + '\n')
     '''
     if acc > best_acc:
         print('Saving..  %f' % acc)
@@ -239,12 +234,17 @@ if __name__ == '__main__':
     learning_rate = args.lr
     all_time = time.time()
     for epoch in range(start_epoch, start_epoch+args.epoch):
-        state_bfore = copy.deepcopy(encoder.model.state_dict())
+        #state_bfore = copy.deepcopy(encoder.model.state_dict())
         epoch_time = time.time()
         dataloaders['train'].shuffle()
         train(epoch)
         test(epoch)
-        state_after = encoder.model.state_dict()
+        #state_after = encoder.model.state_dict()
+        #grad = {}
+        #for key in state_bfore.keys():
+        #    grad[key] = state_after[key] - state_bfore[key]
+        #if epoch==20:
+        #    print(grad)
         """
         if epoch%2 == 0 and epoch != 0:
             if dataloaders['train'].get_batch_size() > 1:
@@ -252,7 +252,4 @@ if __name__ == '__main__':
                 print("batch decay. Now size: %d"%dataloaders['train'].get_batch_size())
         """
         print("time took for epoch: %f"%(time.time()-epoch_time))
-
     print("time took for all: %f"%(time.time()-all_time))
-    logfileAcc.close()
-    logfileLoss.close()
