@@ -29,7 +29,7 @@ parser.add_argument('--epoch', default=200, type=int, help='define epoch')
 parser.add_argument('--silent', action='store_false', help='Only print test result')
 parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
 #parser.add_argument('--arch', default='ernn', help='Network architecture')
-parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
+parser.add_argument('--num_split', default=-1, type=int, help='Number of split RNN')
 parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
 args = parser.parse_args()
@@ -49,7 +49,7 @@ print('==> Building model..')
 
 input_size = 128  #same as embedding size
 num_layers = 1      ###
-num_split = args.num_split
+num_split = -1
 hidden_size = args.hidden_size
 output_size = 2
 batch_size = args.batch_size
