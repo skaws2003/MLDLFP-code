@@ -7,6 +7,8 @@ from torch.nn.utils.rnn import PackedSequence
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# classic GRU model
+# default RNN for testing in experiment
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, device = 'cpu', batch_first = True):
         super(RNN, self).__init__()

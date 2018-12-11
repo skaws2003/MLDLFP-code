@@ -7,6 +7,7 @@ from torch.nn import init
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+# custom Domain Controlled Multi-cell RNN
 class DCMRNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_split=3, device = 'cpu', batch_first = True):
         super(DCMRNN, self).__init__()

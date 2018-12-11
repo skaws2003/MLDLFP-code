@@ -1,4 +1,4 @@
-'''Train CIFAR10 with PyTorch.'''
+'''Main code for normal GRU RNN model for testing'''
 from __future__ import print_function
 
 import torch
@@ -20,6 +20,7 @@ from dataloader import *
 from utils import Lang
 from models.seq2seq import *
 
+# argument processing
 parser = argparse.ArgumentParser(description='PyTorch ERNN Training')
 parser.add_argument('--lr', default=0.01, type=float, help='Initial learning rate')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
@@ -97,7 +98,7 @@ if device == 'cuda':
     net = torch.nn.DataParallel(net)
     cudnn.benchmark = True
 '''
-
+# resuming from checkpoint
 if args.resume:
     # Load checkpoint.
     print('==> Resuming from checkpoint..')
@@ -159,6 +160,7 @@ def train(epoch):
     #encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
     #decoder_scheduler.step(metrics=train_loss)
 
+# testing
 def test(epoch):
     global best_acc
     encoder.eval()

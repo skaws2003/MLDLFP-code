@@ -8,7 +8,7 @@ import itertools
 #from utils.graph_definition import *
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-
+# RNN for encoding
 class EncoderRNN(nn.Module):
     def __init__(self, input_size, hidden_size, embedding, net, n_layers=1, num_split=3, dropout=0, device='cpu'):
         super(EncoderRNN, self).__init__()

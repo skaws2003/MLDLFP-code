@@ -7,7 +7,7 @@ import numpy as np
 #from utils.graph_definition import *
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-
+# old rnn model made in process of making dcmrnn
 class NTRNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes=2, num_split=3, device = 'cpu', batch_first = True):
         super(NTRNN, self).__init__()
