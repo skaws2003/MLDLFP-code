@@ -106,8 +106,8 @@ criterion = nn.NLLLoss()
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
-encoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=encoder_optimizer, factor=0.95, patience=10)
-decoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=decoder_optimizer,factor=0.95,patience=10)
+encoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=encoder_optimizer, factor=0.5, patience=10)
+decoder_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer=decoder_optimizer,factor=0.5,patience=10)
 
 
 # Training
@@ -150,8 +150,8 @@ def train(epoch):
 
         
 
-    #encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
-    #decoder_scheduler.step(metrics=train_loss)
+    encoder_scheduler.step(metrics=train_loss)      # Learning rate decay
+    decoder_scheduler.step(metrics=train_loss)
 
 def test(epoch):
     global best_acc
