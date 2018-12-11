@@ -137,7 +137,7 @@ def train(epoch):
         output, hidden = decoder(hidden, outputs)
 
 
-        loss = criterion(output, targets)
+        loss = criterion(output, targets, domain_weight)
         loss.backward()
 
         encoder_optimizer.step()
@@ -177,7 +177,7 @@ def test(epoch):
             outputs = outputs.transpose(0, 1)
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(output, targets)
+            loss = criterion(output, targets, domain_weight)
 
             test_loss += loss.item()
             _, predicted = output.max(1)
@@ -195,11 +195,13 @@ def test(epoch):
     logfileAcc.write(str(epoch) + '\t' + str(acc) + '\n')
     logfileLoss.write(str(epoch) + '\t' + str(test_loss) + '\n')
 
+    """
     if acc > best_acc:
         print('Saving..  %f' % acc)
         with open('Rpweights.pickle', 'wb') as handle:
             pickle.dump(domain_weight, handle, protocol=pickle.HIGHEST_PROTOCOL)
         best_acc = acc
+    """
 
     '''
         state = {
