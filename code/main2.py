@@ -32,6 +32,8 @@ parser.add_argument('--silent', action='store_false', help='Only print test resu
 parser.add_argument('--hidden_size', default=512, type=int, help='Hidden Layer size')
 #parser.add_argument('--arch', default='ernn', help='Network architecture')
 parser.add_argument('--num_split', default=3, type=int, help='Number of split RNN')
+parser.add_argument('--hyper1', default=2, type=int, help='DAloss parameter 1')
+parser.add_argument('--hyper2', default=3, type=int, help='DAloss parameter 2')
 parser.add_argument('--cuda', default=0,type=int,help='gpu num')
 
 args = parser.parse_args()
@@ -53,6 +55,8 @@ input_size = 128  #same as embedding size
 num_layers = 2      ###
 num_split = args.num_split
 hidden_size = args.hidden_size
+hyper1 = args.hyper1
+hyper2 = args.hyper2
 output_size = 2
 batch_size = args.batch_size
 
@@ -61,6 +65,8 @@ net=darnn.DARNN
 # Log files
 logfileAcc = open("log_da_acc%d.txt"%args.hidden_size,'w')
 logfileLoss = open("log_da_loss%d.txt"%args.hidden_size,'w')
+
+
 
 # Set batch size to 1 for embedding
 dataloaders['train'].set_batch_size(1)
@@ -106,7 +112,8 @@ if args.resume:
     start_epoch = checkpoint['epoch']
     print('net acc :', best_acc, 'epoch :', start_epoch)
 
-criterion = nn.DALoss(1, 1)
+print(hyper1, hyper2)
+criterion = DALoss(hyper1, hyper2)
 encoder_optimizer = optim.SGD(encoder.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 decoder_optimizer = optim.SGD(decoder.parameters(), lr=args.lr)
 
@@ -137,7 +144,7 @@ def train(epoch):
         output, hidden = decoder(hidden, outputs)
 
 
-        loss = criterion(output, targets)
+        loss = criterion(domain_weight, output, targets)
         loss.backward()
 
         encoder_optimizer.step()
@@ -177,7 +184,7 @@ def test(epoch):
             outputs = outputs.transpose(0, 1)
             output, hidden = decoder(hidden, outputs)
 
-            loss = criterion(output, targets)
+            loss = criterion(domain_weight, output, targets)
 
             test_loss += loss.item()
             _, predicted = output.max(1)
@@ -195,11 +202,13 @@ def test(epoch):
     logfileAcc.write(str(epoch) + '\t' + str(acc) + '\n')
     logfileLoss.write(str(epoch) + '\t' + str(test_loss) + '\n')
 
+    """
     if acc > best_acc:
         print('Saving..  %f' % acc)
         with open('Rpweights.pickle', 'wb') as handle:
             pickle.dump(domain_weight, handle, protocol=pickle.HIGHEST_PROTOCOL)
         best_acc = acc
+    """
 
     '''
         state = {
